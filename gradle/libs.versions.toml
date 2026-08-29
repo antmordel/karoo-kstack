@@ -1,0 +1,23 @@
+[versions]
+agp = "8.5.2"
+kotlin = "2.0.20"
+
+androidxCore = "1.15.0"
+glance = "1.1.1"
+karooExt = "1.1.9"
+
+junit = "4.13.2"
+kotlinxCoroutines = "1.8.1"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+[libraries]
+hammerhead-karoo-ext = { group = "io.hammerhead", name = "karoo-ext", version.ref = "karooExt" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
+androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }

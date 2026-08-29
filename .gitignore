@@ -1,0 +1,17 @@
+# Planning artifacts — local only
+_bmad/
+_bmad-output/
+.claude/
+
+# Gradle / Android
+.gradle/
+build/
+local.properties
+*.apk
+*.jks
+*.keystore
+
+# IDE
+.idea/
+*.iml
+.DS_Store
