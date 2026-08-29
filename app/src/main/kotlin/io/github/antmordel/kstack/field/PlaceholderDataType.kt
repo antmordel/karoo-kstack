@@ -8,6 +8,9 @@ import io.github.antmordel.kstack.render.PlaceholderView
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.ViewConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Proves the extension is installed and that Karoo can render one of its graphical fields.
@@ -21,10 +24,15 @@ class PlaceholderDataType(extension: String) : DataTypeImpl(extension, TYPE_ID) 
     private val glance = GlanceRemoteViews()
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
-        val result = glance.compose(context, DpSize.Unspecified) {
-            PlaceholderView(config)
+        // GlanceRemoteViews.compose is suspending, so the view is composed on a job that
+        // Karoo cancels through the emitter when the field leaves the screen.
+        val job = CoroutineScope(Dispatchers.IO).launch {
+            val result = glance.compose(context, DpSize.Unspecified) {
+                PlaceholderView(config)
+            }
+            emitter.updateView(result.remoteViews)
         }
-        emitter.updateView(result.remoteViews)
+        emitter.setCancellable { job.cancel() }
     }
 
     companion object {

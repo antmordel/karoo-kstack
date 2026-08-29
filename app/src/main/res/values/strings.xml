@@ -2,14 +2,8 @@
 <resources>
     <string name="app_name">KStack</string>
 
+    <string name="main_screen_body">KStack is installed.\n\nAdd KStack fields from the ride profile page editor.</string>
+
     <string name="field_placeholder">KStack Placeholder</string>
     <string name="field_placeholder_description">Confirms the KStack extension is installed and reachable.</string>
-
-    <!-- Secondary row labels. Kept short: they render beneath the primary value. -->
-    <string name="label_avg">avg</string>
-    <string name="label_max">max</string>
-    <string name="label_norm">norm</string>
-
-    <!-- Shown in place of a value whose stream is unavailable. -->
-    <string name="value_missing">--</string>
 </resources>

@@ -36,6 +36,9 @@ android {
     lint {
         warningsAsErrors = true
         abortOnError = true
+        // These two fail whenever Google publishes a release, with no change on our side —
+        // a green build would turn red on its own. Dependency currency is Dependabot's job.
+        disable += setOf("GradleDependency", "AndroidGradlePluginVersion")
     }
 }
 
@@ -43,6 +46,7 @@ dependencies {
     implementation(libs.hammerhead.karoo.ext)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.glance.appwidget)
+    implementation(libs.timber)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

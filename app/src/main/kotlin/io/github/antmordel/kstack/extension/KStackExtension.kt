@@ -1,10 +1,10 @@
 package io.github.antmordel.kstack.extension
 
-import android.util.Log
 import io.github.antmordel.kstack.field.PlaceholderDataType
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.extension.KarooExtension
+import timber.log.Timber
 
 /**
  * Entry point Karoo OS binds to. Owns the connection to [KarooSystemService] and the list of
@@ -25,7 +25,7 @@ class KStackExtension : KarooExtension(EXTENSION_ID, EXTENSION_VERSION) {
         super.onCreate()
         karooSystem = KarooSystemService(this)
         karooSystem.connect { connected ->
-            Log.i(TAG, "Karoo system connected: $connected")
+            Timber.i("Karoo system connected: %b", connected)
         }
     }
 
@@ -35,8 +35,6 @@ class KStackExtension : KarooExtension(EXTENSION_ID, EXTENSION_VERSION) {
     }
 
     private companion object {
-        const val TAG = "KStack"
-
         /** Must match the `id` attribute in `extension_info.xml` and contain no '.'. */
         const val EXTENSION_ID = "kstack"
         const val EXTENSION_VERSION = "1.0"
