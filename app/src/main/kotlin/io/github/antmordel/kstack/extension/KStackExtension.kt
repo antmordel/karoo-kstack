@@ -1,0 +1,42 @@
+package io.github.antmordel.kstack.extension
+
+import io.github.antmordel.kstack.field.PlaceholderDataType
+import io.hammerhead.karooext.KarooSystemService
+import io.hammerhead.karooext.extension.DataTypeImpl
+import io.hammerhead.karooext.extension.KarooExtension
+import timber.log.Timber
+
+/**
+ * Entry point Karoo OS binds to. Owns the connection to [KarooSystemService] and the list of
+ * data types the extension publishes.
+ *
+ * [types] must stay in sync with the `DataType` entries in `res/xml/extension_info.xml`: a type
+ * listed in one and not the other never reaches the field picker.
+ */
+class KStackExtension : KarooExtension(EXTENSION_ID, EXTENSION_VERSION) {
+
+    private lateinit var karooSystem: KarooSystemService
+
+    override val types: List<DataTypeImpl> by lazy {
+        listOf(PlaceholderDataType(extension))
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        karooSystem = KarooSystemService(this)
+        karooSystem.connect { connected ->
+            Timber.i("Karoo system connected: %b", connected)
+        }
+    }
+
+    override fun onDestroy() {
+        karooSystem.disconnect()
+        super.onDestroy()
+    }
+
+    private companion object {
+        /** Must match the `id` attribute in `extension_info.xml` and contain no '.'. */
+        const val EXTENSION_ID = "kstack"
+        const val EXTENSION_VERSION = "1.0"
+    }
+}

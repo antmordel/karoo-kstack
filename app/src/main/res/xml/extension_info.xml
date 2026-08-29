@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  One DataType entry per StackedFieldDefinition in the catalog. A definition without an
+  entry here never reaches the Karoo field picker.
+-->
+<ExtensionInfo
+    id="kstack"
+    displayName="@string/app_name"
+    icon="@drawable/ic_kstack"
+    scansDevices="false">
+
+    <DataType
+        typeId="placeholder-stack"
+        displayName="@string/field_placeholder"
+        description="@string/field_placeholder_description"
+        graphical="true"
+        icon="@drawable/ic_kstack" />
+</ExtensionInfo>

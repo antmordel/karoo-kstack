@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KStack</string>
+
+    <string name="main_screen_body">KStack is installed.\n\nAdd KStack fields from the ride profile page editor.</string>
+
+    <string name="field_placeholder">KStack Placeholder</string>
+    <string name="field_placeholder_description">Confirms the KStack extension is installed and reachable.</string>
+</resources>
