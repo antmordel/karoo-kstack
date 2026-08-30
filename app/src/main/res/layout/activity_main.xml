@@ -1,29 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The whole screen closes on tap, and the button says so. A Karoo is used with gloves on and its
-  back gesture is not obvious on this screen, so leaving needs an unmissable target.
+  One section per field, built at runtime from Definitions.all so a field added later appears here
+  without touching this file.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clickable="true"
-    android:focusable="true"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/main_screen_body"
-        android:textSize="16sp" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp">
 
+        <LinearLayout
+            android:id="@+id/fields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <!--
+      A Karoo is used with gloves on and the back gesture is not obvious on this screen, so leaving
+      needs an unmissable target that stays put while the list scrolls.
+    -->
     <Button
         android:id="@+id/close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_margin="16dp"
         android:text="@string/main_screen_close" />
 </LinearLayout>

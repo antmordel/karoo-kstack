@@ -24,6 +24,8 @@ import androidx.glance.unit.ColorProvider
 import io.github.antmordel.kstack.R
 import io.github.antmordel.kstack.field.StackedFieldDefinition
 import io.github.antmordel.kstack.field.StackedFieldState
+import io.github.antmordel.kstack.settings.FieldSettings
+import io.github.antmordel.kstack.settings.SecondaryLayout
 import io.hammerhead.karooext.models.UserProfile
 import io.hammerhead.karooext.models.ViewConfig
 import androidx.compose.ui.unit.dp as composeDp
@@ -38,11 +40,15 @@ private const val ICON_RATIO = 0.8f
  */
 private const val LABEL_RATIO = 0.62f
 
-/**
- * Secondaries pair up across a row rather than stacking. Two of them cost one row instead of two,
- * which is height the primary gets to keep.
- */
+/** Side by side, two secondaries cost one row instead of two — height the primary gets to keep. */
 private const val SECONDARIES_PER_ROW = 2
+
+/**
+ * Groups secondaries into the rows the rider asked for. Pure, so the arrangement is testable
+ * without composing a view.
+ */
+internal fun <T> List<T>.inSecondaryRows(layout: SecondaryLayout): List<List<T>> =
+    chunked(if (layout == SecondaryLayout.SIDE_BY_SIDE) SECONDARIES_PER_ROW else 1)
 
 /**
  * Content colour follows the device's day/night setting.
@@ -70,9 +76,10 @@ fun StackedFieldView(
     state: StackedFieldState,
     profile: UserProfile?,
     config: ViewConfig,
+    settings: FieldSettings,
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
-    val secondaryRows = state.secondaries.chunked(SECONDARIES_PER_ROW)
+    val secondaryRows = state.secondaries.inSecondaryRows(settings.secondaryLayout)
     val sizes = stackedTextSizes(config, secondaryRows.size, density)
     val horizontalAlignment = config.alignment.toGlanceAlignment()
     val contentColor = contentColor()

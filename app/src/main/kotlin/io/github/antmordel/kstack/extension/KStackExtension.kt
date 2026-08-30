@@ -3,6 +3,7 @@ package io.github.antmordel.kstack.extension
 import io.github.antmordel.kstack.field.Definitions
 import io.github.antmordel.kstack.field.KarooStreamSource
 import io.github.antmordel.kstack.field.StackedDataType
+import io.github.antmordel.kstack.settings.SharedPreferencesSettingsStore
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.github.antmordel.kstack.BuildConfig
@@ -22,7 +23,8 @@ class KStackExtension : KarooExtension(EXTENSION_ID, EXTENSION_VERSION) {
 
     override val types: List<DataTypeImpl> by lazy {
         val streams = KarooStreamSource(karooSystem)
-        Definitions.all.map { StackedDataType(extension, it, streams) }
+        val settings = SharedPreferencesSettingsStore(this)
+        Definitions.all.map { StackedDataType(extension, it, streams, settings) }
     }
 
     override fun onCreate() {

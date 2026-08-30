@@ -28,6 +28,7 @@ object Definitions {
 
     val HeartRate = StackedFieldDefinition(
         fieldId = "hr-stack",
+        nameRes = R.string.field_hr_stack,
         primary = StackedValue(DataType.Type.HEART_RATE, previewValue = 142.0),
         secondaries = listOf(
             StackedValue(DataType.Type.AVERAGE_HR, R.string.label_avg, previewValue = 128.0),
@@ -38,6 +39,7 @@ object Definitions {
 
     val HeartRatePercent = StackedFieldDefinition(
         fieldId = "hr-percent-stack",
+        nameRes = R.string.field_hr_percent_stack,
         primary = StackedValue(
             DataType.Type.HEART_RATE,
             transform = PercentOfMaxHr,
@@ -62,6 +64,7 @@ object Definitions {
 
     val Speed = StackedFieldDefinition(
         fieldId = "speed-stack",
+        nameRes = R.string.field_speed_stack,
         primary = StackedValue(DataType.Type.SPEED, previewValue = 8.9),
         secondaries = listOf(
             StackedValue(DataType.Type.AVERAGE_SPEED, R.string.label_avg, previewValue = 7.5),
@@ -73,6 +76,7 @@ object Definitions {
 
     val Power = StackedFieldDefinition(
         fieldId = "power-stack",
+        nameRes = R.string.field_power_stack,
         primary = StackedValue(DataType.Type.POWER, previewValue = 248.0),
         secondaries = listOf(
             StackedValue(DataType.Type.NORMALIZED_POWER, R.string.label_norm, previewValue = 264.0),

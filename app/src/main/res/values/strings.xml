@@ -2,8 +2,12 @@
 <resources>
     <string name="app_name">KStack</string>
 
-    <string name="main_screen_body">KStack is installed.\n\nAdd KStack fields from the ride profile page editor.</string>
     <string name="main_screen_close">Close</string>
+
+    <!-- Settings screen. Kept terse: the Karoo screen is small and read with gloves on. -->
+    <string name="setting_secondary_layout">Secondary values</string>
+    <string name="setting_layout_side_by_side">Side by side</string>
+    <string name="setting_layout_stacked">Stacked</string>
 
     <string name="field_hr_stack">HR Stack</string>
     <string name="field_hr_stack_description">Heart rate, with ride average and maximum beneath it.</string>

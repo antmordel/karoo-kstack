@@ -64,6 +64,8 @@ fun interface ValueFormatter {
  */
 data class StackedFieldDefinition(
     val fieldId: String,
+    /** The name the field picker shows. The settings screen labels its rows with the same string. */
+    @StringRes val nameRes: Int,
     val primary: StackedValue,
     val secondaries: List<StackedValue>,
     @DrawableRes val iconRes: Int,

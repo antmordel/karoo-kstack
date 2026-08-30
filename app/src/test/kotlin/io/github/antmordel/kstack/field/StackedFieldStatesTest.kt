@@ -53,6 +53,7 @@ private val PercentOfMaxHr = ValueTransform { raw, userProfile ->
 
 private val definition = StackedFieldDefinition(
     fieldId = "test-stack",
+    nameRes = 1,
     primary = StackedValue(PRIMARY),
     secondaries = listOf(
         StackedValue(AVG, LABEL_AVG),
