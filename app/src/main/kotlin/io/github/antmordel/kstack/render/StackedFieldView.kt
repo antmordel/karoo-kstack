@@ -88,7 +88,7 @@ fun StackedFieldView(
     )
 
     Column(
-        modifier = GlanceModifier.fillMaxSize().padding(horizontal = 6.composeDp, vertical = 2.composeDp),
+        modifier = GlanceModifier.fillMaxSize().padding(horizontal = 10.composeDp, vertical = 2.composeDp),
         horizontalAlignment = horizontalAlignment,
         verticalAlignment = Alignment.CenterVertically,
     ) {
