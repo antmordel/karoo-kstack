@@ -49,6 +49,9 @@ private const val SUFFIX_RATIO = 0.55f
 /** The two pairs on a row never touch, however wide their numbers get. */
 private const val MINIMUM_PAIR_GAP = 8
 
+/** The gap after a label, counted in digit-widths so it is part of the width estimate. */
+private const val GAP_UNITS = 0.6f
+
 /** Side by side, two secondaries cost one row instead of two — height the primary gets to keep. */
 private const val SECONDARIES_PER_ROW = 2
 
@@ -62,8 +65,11 @@ internal data class DrawnValue(val label: String, val value: String, val suffix:
      * Character widths for this pair, with the smaller label and suffix counted at their own
      * scale, plus a couple for the gap that follows the label.
      */
-    fun widthUnits(): Int =
-        (label.length * LABEL_RATIO + value.length + suffix.length * SUFFIX_RATIO + 1f).toInt() + 1
+    fun widthUnits(): Float =
+        textWidthUnits(label) * LABEL_RATIO +
+            textWidthUnits(value) +
+            textWidthUnits(suffix) * SUFFIX_RATIO +
+            GAP_UNITS
 }
 
 /**
@@ -117,8 +123,10 @@ fun StackedFieldView(
     val sizes = stackedTextSizes(
         config = config,
         secondaryRowCount = secondaryRows.size,
-        primaryWidth = primaryText.length + (suffix.length * SUFFIX_RATIO).toInt(),
-        widestSecondaryRow = secondaryRows.maxOfOrNull { row -> row.sumOf { it.widthUnits() } } ?: 0,
+        primaryWidth = textWidthUnits(primaryText) + textWidthUnits(suffix) * SUFFIX_RATIO,
+        widestSecondaryRow = secondaryRows.maxOfOrNull { row ->
+            row.map { it.widthUnits() }.sum()
+        } ?: 0f,
         density = density,
     )
     val horizontalAlignment = config.alignment.toGlanceAlignment()
