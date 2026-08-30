@@ -11,6 +11,7 @@
     <string name="setting_zone_color">Zone colour</string>
     <string name="setting_zone_color_none">Off</string>
     <string name="setting_zone_color_icon">Icon</string>
+    <string name="setting_zone_color_field">Field</string>
 
     <string name="field_hr_stack">HR Stack</string>
     <string name="field_hr_stack_description">Heart rate, with ride average and maximum beneath it.</string>

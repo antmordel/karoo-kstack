@@ -71,6 +71,13 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/setting_zone_color_icon" />
+
+            <RadioButton
+                android:id="@+id/zone_color_field"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/setting_zone_color_field" />
         </RadioGroup>
     </LinearLayout>
 </LinearLayout>

@@ -99,6 +99,10 @@ none renders exactly as it does with colouring off, which is what Speed Stack do
   Karoo OS change can drift from them.
 - **Colours are spread across the palette by position, not by index**, so a rider with seven power
   zones and one with five heart rate zones both see the top zone in the top colour.
+- **On a zone-coloured field the text colour comes from the background, not the device.** Amber
+  needs black text in night mode too. The choice uses the WCAG contrast ratio rather than a
+  brightness threshold, which picks wrongly for the saturated mid stops, and `ContrastTest` holds
+  every palette entry to the 3:1 large-text threshold — so a new colour cannot be added blind.
 - **`zoneIndex` assumes Karoo reports Z1 as 1**, matching how its own screens label zones. It is a
   one-line change if a device says otherwise, and `ZonesTest` pins the behaviour either way.
 
