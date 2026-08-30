@@ -5,6 +5,7 @@ _bmad-output/
 
 # Gradle / Android
 .gradle/
+.kotlin/
 build/
 local.properties
 *.apk

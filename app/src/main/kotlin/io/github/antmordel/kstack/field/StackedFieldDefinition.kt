@@ -1,0 +1,49 @@
+package io.github.antmordel.kstack.field
+
+import androidx.annotation.StringRes
+import io.hammerhead.karooext.models.UserProfile
+
+/**
+ * Turns a raw stream value into the number a row displays.
+ *
+ * Must be pure: a function of the emission and the profile, with no memory between calls. That is
+ * what keeps the extension free of ride state, so averages and maxima stay Karoo's to define.
+ *
+ * The profile is nullable because it arrives asynchronously and most rows never need it. Returning
+ * `null` marks the value missing, which the field renders as a dash.
+ */
+fun interface ValueTransform {
+    fun apply(raw: Double, profile: UserProfile?): Double?
+
+    companion object {
+        /** Passes the stream value straight through. The common case. */
+        val Identity = ValueTransform { raw, _ -> raw }
+    }
+}
+
+/**
+ * One number in a stacked field: which Karoo stream it reads, how to label it, and how to derive
+ * the displayed value from the raw emission.
+ *
+ * @property dataTypeId a [io.hammerhead.karooext.models.DataType.Type] constant.
+ * @property labelRes short label drawn beside the value; `null` for the primary, which has none.
+ */
+data class StackedValue(
+    val dataTypeId: String,
+    @StringRes val labelRes: Int? = null,
+    val transform: ValueTransform = ValueTransform.Identity,
+)
+
+/**
+ * A complete stacked field: one large primary value over an ordered list of smaller labeled ones.
+ *
+ * The list is open-ended by design — a field may carry one secondary or four, and adding "last lap
+ * average" later is an entry here rather than a change to any renderer.
+ *
+ * @property fieldId must match a `DataType typeId` in `res/xml/extension_info.xml`.
+ */
+data class StackedFieldDefinition(
+    val fieldId: String,
+    val primary: StackedValue,
+    val secondaries: List<StackedValue>,
+)
