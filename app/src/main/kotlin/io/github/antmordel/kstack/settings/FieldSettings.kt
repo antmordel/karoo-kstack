@@ -21,6 +21,9 @@ enum class ZoneColorMode {
 
     /** The metric icon takes the zone colour; every other pixel is unchanged. */
     ICON,
+
+    /** The field background takes the zone colour, and the text follows the background. */
+    FIELD,
     ;
 
     companion object {

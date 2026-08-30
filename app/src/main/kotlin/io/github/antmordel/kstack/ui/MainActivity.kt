@@ -83,10 +83,12 @@ class MainActivity : Activity() {
     private fun ZoneColorMode.radioId() = when (this) {
         ZoneColorMode.NONE -> R.id.zone_color_none
         ZoneColorMode.ICON -> R.id.zone_color_icon
+        ZoneColorMode.FIELD -> R.id.zone_color_field
     }
 
     private fun Int.toZoneColorMode() = when (this) {
         R.id.zone_color_icon -> ZoneColorMode.ICON
+        R.id.zone_color_field -> ZoneColorMode.FIELD
         else -> ZoneColorMode.NONE
     }
 }

@@ -26,6 +26,11 @@ class FieldSettingsTest {
     }
 
     @Test
+    fun `the field colouring mode is read back`() {
+        assertEquals(ZoneColorMode.FIELD, fieldSettingsFrom(null, "FIELD").zoneColorMode)
+    }
+
+    @Test
     fun `the two settings are independent`() {
         val settings = fieldSettingsFrom("STACKED", "ICON")
 

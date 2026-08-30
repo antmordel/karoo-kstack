@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.ColorFilter
+import androidx.glance.background
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
@@ -83,12 +84,14 @@ fun StackedFieldView(
     val secondaryRows = state.secondaries.inSecondaryRows(settings.secondaryLayout)
     val sizes = stackedTextSizes(config, secondaryRows.size, density)
     val horizontalAlignment = config.alignment.toGlanceAlignment()
-    val contentColor = contentColor()
+    // Null whenever there is no zone to colour by, which is also what a field with colouring off
+    // and a field on a metric without zones both look like.
+    val zoneColor = state.zone?.let { zoneColor(it, state.zoneCount) }
+    val background = zoneColor.takeIf { settings.zoneColorMode == ZoneColorMode.FIELD }
+    val contentColor = background?.let { ColorProvider(contentColorOn(it)) } ?: contentColor()
     val iconColor = when (settings.zoneColorMode) {
-        ZoneColorMode.NONE -> contentColor
-        ZoneColorMode.ICON -> state.zone
-            ?.let { ColorProvider(zoneColor(it, state.zoneCount)) }
-            ?: contentColor
+        ZoneColorMode.NONE, ZoneColorMode.FIELD -> contentColor
+        ZoneColorMode.ICON -> zoneColor?.let { ColorProvider(it) } ?: contentColor
     }
     // Verbose, and only reachable in debug builds where a Timber tree is planted. The layout
     // constants here were set against a real Karoo, and this is how they were read back.
@@ -102,7 +105,10 @@ fun StackedFieldView(
     )
 
     Column(
-        modifier = GlanceModifier.fillMaxSize().padding(horizontal = 10.composeDp, vertical = 2.composeDp),
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .let { if (background != null) it.background(ColorProvider(background)) else it }
+            .padding(horizontal = 10.composeDp, vertical = 2.composeDp),
         horizontalAlignment = horizontalAlignment,
         verticalAlignment = Alignment.CenterVertically,
     ) {
