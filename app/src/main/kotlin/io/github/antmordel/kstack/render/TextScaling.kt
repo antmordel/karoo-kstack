@@ -10,8 +10,8 @@ data class StackedTextSizes(
     val secondarySp: Float,
 )
 
-/** Secondary rows read as subordinate at this fraction of the primary. Set by eye on a Karoo. */
-private const val SECONDARY_RATIO = 0.38f
+/** Secondary values as a fraction of the primary. Set by eye on a Karoo. */
+private const val SECONDARY_RATIO = 0.48f
 
 /** Below this the numbers stop being readable at arm's length on a bike. */
 private const val MINIMUM_SP = 9f

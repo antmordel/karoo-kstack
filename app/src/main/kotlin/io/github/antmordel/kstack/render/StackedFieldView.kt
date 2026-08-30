@@ -31,8 +31,12 @@ import androidx.compose.ui.unit.dp as composeDp
 /** Icon squares scale with the number beside them. */
 private const val ICON_RATIO = 0.8f
 
-/** Labels read as subordinate to the value they sit beside. */
-private const val LABEL_RATIO = 0.8f
+/**
+ * Labels stay small and light while their value grows: the number is what a rider reads at a
+ * glance, and `avg` only has to be identifiable. Chosen so the label keeps roughly the size it had
+ * when the secondary values were smaller.
+ */
+private const val LABEL_RATIO = 0.62f
 
 /**
  * Secondaries pair up across a row rather than stacking. Two of them cost one row instead of two,
