@@ -13,6 +13,11 @@ jobs:
     runs-on: [self-hosted, linux, x64]
     permissions:
       contents: write
+    env:
+      # Named once: the signature check below reaches into build-tools by path, and when that
+      # drifted from what is installed the step failed only after a tag had been pushed.
+      ANDROID_PLATFORM: platforms;android-37.0
+      ANDROID_BUILD_TOOLS: 37.0.0
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,7 +31,7 @@ jobs:
 
       - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
         with:
-          packages: platform-tools platforms;android-35 build-tools;35.0.0
+          packages: platform-tools ${{ env.ANDROID_PLATFORM }} build-tools;${{ env.ANDROID_BUILD_TOOLS }}
 
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
         with:
@@ -62,7 +67,7 @@ jobs:
         run: |
           # An unsigned APK builds and uploads happily, and only fails at install time on the
           # Karoo. Fail here instead, where the tag can still be moved.
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs \
+          "$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS/apksigner" verify --print-certs \
             app/build/outputs/apk/release/app-release.apk
 
       - name: Publish the release
