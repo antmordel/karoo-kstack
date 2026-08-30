@@ -83,18 +83,14 @@ data class StackedFieldDefinition(
     @StringRes val suffixRes: Int? = null,
 ) {
     /**
-     * What the field shows in the data page editor. Karoo streams nothing there, and a rider
-     * arranging a page needs to see the shape of the field rather than a column of dashes.
-     */
-    /**
-     * Fills any row the streams have nothing for with its preview value.
+     * Fills any row the streams have nothing for with its preview value, at [step] of the sweep.
      *
      * The page editor does feed the real data types, the way it feeds Karoo's own fields, so a
      * preview shows live numbers where there are any. The fallback is what keeps a field from
      * previewing as a row of dashes when a sensor is not paired.
      */
-    fun withPreviewFallback(state: StackedFieldState): StackedFieldState {
-        val preview = previewState()
+    fun withPreviewFallback(state: StackedFieldState, step: Int = 0): StackedFieldState {
+        val preview = previewState(step)
         return StackedFieldState(
             primary = state.primary ?: preview.primary,
             secondaries = state.secondaries.mapIndexed { index, secondary ->
@@ -105,18 +101,37 @@ data class StackedFieldDefinition(
         )
     }
 
-    fun previewState() = StackedFieldState(
-        primary = primary.previewValue,
-        secondaries = secondaries.map { SecondaryState(it.labelRes, it.previewValue) },
-        // A mid zone, so a rider previewing a coloured field in the editor sees the colouring
-        // rather than a field that looks like colouring never took effect.
-        zone = zone?.let { PREVIEW_ZONE },
-        zoneCount = zone?.let { PREVIEW_ZONE_COUNT } ?: 0,
-    )
+    /**
+     * The stand-in reading at [step] of the sweep.
+     *
+     * A field frozen on one number reads as broken beside Karoo's own, which move even while the
+     * bike is on the stand. Only the primary climbs: an average and a maximum barely shift second
+     * to second on a real ride, and one moving number is what a rider is looking for.
+     */
+    fun previewState(step: Int = 0): StackedFieldState {
+        val phase = step.mod(PREVIEW_STEPS).toDouble() / PREVIEW_STEPS
+        return StackedFieldState(
+            primary = primary.previewValue * (1.0 + PREVIEW_SWEEP * phase),
+            secondaries = secondaries.map { SecondaryState(it.labelRes, it.previewValue) },
+            // The zone climbs with the value, so a rider previewing a coloured field sees the
+            // whole palette rather than one colour that could be the uncoloured default.
+            zone = zone?.let { (phase * PREVIEW_ZONE_COUNT).toInt().coerceAtMost(PREVIEW_ZONE_COUNT - 1) },
+            zoneCount = zone?.let { PREVIEW_ZONE_COUNT } ?: 0,
+        )
+    }
 
     private companion object {
-        /** Zone 4 of 5: high enough that the colour is obviously not the uncoloured default. */
-        const val PREVIEW_ZONE = 3
+        /**
+         * How far the primary climbs across a sweep, as a fraction of its own preview value.
+         *
+         * Relative rather than absolute because one number has to stay plausible for a heart rate,
+         * a speed with a decimal and a lap time counted in seconds.
+         */
+        const val PREVIEW_SWEEP = 0.07
+
+        /** Steps in one sweep. At the editor's one-second tick, a sweep takes twenty seconds. */
+        const val PREVIEW_STEPS = 20
+
         const val PREVIEW_ZONE_COUNT = 5
     }
 }
