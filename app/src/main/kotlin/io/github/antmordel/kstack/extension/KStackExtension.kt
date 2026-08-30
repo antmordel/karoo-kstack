@@ -1,6 +1,8 @@
 package io.github.antmordel.kstack.extension
 
-import io.github.antmordel.kstack.field.PlaceholderDataType
+import io.github.antmordel.kstack.field.Definitions
+import io.github.antmordel.kstack.field.KarooStreamSource
+import io.github.antmordel.kstack.field.StackedDataType
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.extension.KarooExtension
@@ -18,7 +20,8 @@ class KStackExtension : KarooExtension(EXTENSION_ID, EXTENSION_VERSION) {
     private lateinit var karooSystem: KarooSystemService
 
     override val types: List<DataTypeImpl> by lazy {
-        listOf(PlaceholderDataType(extension))
+        val streams = KarooStreamSource(karooSystem)
+        Definitions.all.map { StackedDataType(extension, it, streams) }
     }
 
     override fun onCreate() {

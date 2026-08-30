@@ -1,7 +1,9 @@
 package io.github.antmordel.kstack.field
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import io.hammerhead.karooext.models.UserProfile
+import kotlin.math.roundToInt
 
 /**
  * Turns a raw stream value into the number a row displays.
@@ -35,6 +37,21 @@ data class StackedValue(
 )
 
 /**
+ * Turns a displayed value into its printed text.
+ *
+ * Lives on the definition so unit handling stays out of the renderer: a field that carries units
+ * converts here, and one that does not uses [Plain].
+ */
+fun interface ValueFormatter {
+    fun format(value: Double, profile: UserProfile?): String
+
+    companion object {
+        /** Whole numbers, which is what every unitless metric wants. */
+        val Plain = ValueFormatter { value, _ -> value.roundToInt().toString() }
+    }
+}
+
+/**
  * A complete stacked field: one large primary value over an ordered list of smaller labeled ones.
  *
  * The list is open-ended by design — a field may carry one secondary or four, and adding "last lap
@@ -46,4 +63,6 @@ data class StackedFieldDefinition(
     val fieldId: String,
     val primary: StackedValue,
     val secondaries: List<StackedValue>,
+    @DrawableRes val iconRes: Int,
+    val formatter: ValueFormatter = ValueFormatter.Plain,
 )
