@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One DataType entry per StackedFieldDefinition in the catalog. A definition without an
-  entry here never reaches the Karoo field picker.
+  One DataType entry per StackedFieldDefinition in Definitions.all. A definition without an entry
+  here never reaches the Karoo field picker, and nothing fails loudly when the two drift, so
+  DefinitionsTest compares them.
 -->
 <ExtensionInfo
     id="kstack"
@@ -14,5 +15,26 @@
         displayName="@string/field_hr_stack"
         description="@string/field_hr_stack_description"
         graphical="true"
-        icon="@drawable/ic_kstack" />
+        icon="@drawable/ic_heart" />
+
+    <DataType
+        typeId="hr-percent-stack"
+        displayName="@string/field_hr_percent_stack"
+        description="@string/field_hr_percent_stack_description"
+        graphical="true"
+        icon="@drawable/ic_heart" />
+
+    <DataType
+        typeId="speed-stack"
+        displayName="@string/field_speed_stack"
+        description="@string/field_speed_stack_description"
+        graphical="true"
+        icon="@drawable/ic_speed" />
+
+    <DataType
+        typeId="power-stack"
+        displayName="@string/field_power_stack"
+        description="@string/field_power_stack_description"
+        graphical="true"
+        icon="@drawable/ic_power" />
 </ExtensionInfo>

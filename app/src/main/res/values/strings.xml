@@ -8,9 +8,19 @@
     <string name="field_hr_stack">HR Stack</string>
     <string name="field_hr_stack_description">Heart rate, with ride average and maximum beneath it.</string>
 
+    <string name="field_hr_percent_stack" formatted="false">HR% Stack</string>
+    <string name="field_hr_percent_stack_description">Heart rate as a percentage of your maximum, with ride average and maximum beneath it.</string>
+
+    <string name="field_speed_stack">Speed Stack</string>
+    <string name="field_speed_stack_description">Speed, with ride average and maximum beneath it.</string>
+
+    <string name="field_power_stack">Power Stack</string>
+    <string name="field_power_stack_description">Power, with normalized and ride average beneath it.</string>
+
     <!-- Secondary row labels. Kept short: they render beneath the primary value. -->
     <string name="label_avg">avg</string>
     <string name="label_max">max</string>
+    <string name="label_norm">norm</string>
 
     <!-- Shown in place of a value whose stream has nothing to report. -->
     <string name="value_missing">--</string>
