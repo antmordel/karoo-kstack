@@ -16,7 +16,7 @@ enum class SecondaryLayout {
 
 /** Whether a field colours itself by the rider's current zone, and what it colours. */
 enum class ZoneColorMode {
-    /** No colouring. What every field did before this setting existed. */
+    /** No colouring at all. */
     NONE,
 
     /** The metric icon takes the zone colour; every other pixel is unchanged. */
@@ -27,7 +27,12 @@ enum class ZoneColorMode {
     ;
 
     companion object {
-        val Default = NONE
+        /**
+         * Colouring the icon is the interesting default: it is what a rider gets from the stock
+         * heart rate field, and it costs nothing legible — the numbers keep the device's own
+         * colours. Off is a choice, not the starting point.
+         */
+        val Default = ICON
     }
 }
 

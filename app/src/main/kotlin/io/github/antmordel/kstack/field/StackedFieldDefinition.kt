@@ -76,11 +76,35 @@ data class StackedFieldDefinition(
      */
     val zone: ZoneSource? = null,
     val formatter: ValueFormatter = ValueFormatter.Plain,
+    /**
+     * Drawn small after every value, for a metric whose number does not read on its own. A
+     * percentage needs its sign; a speed does not need `km/h`, which Karoo's own fields omit too.
+     */
+    @StringRes val suffixRes: Int? = null,
 ) {
     /**
      * What the field shows in the data page editor. Karoo streams nothing there, and a rider
      * arranging a page needs to see the shape of the field rather than a column of dashes.
      */
+    /**
+     * Fills any row the streams have nothing for with its preview value.
+     *
+     * The page editor does feed the real data types, the way it feeds Karoo's own fields, so a
+     * preview shows live numbers where there are any. The fallback is what keeps a field from
+     * previewing as a row of dashes when a sensor is not paired.
+     */
+    fun withPreviewFallback(state: StackedFieldState): StackedFieldState {
+        val preview = previewState()
+        return StackedFieldState(
+            primary = state.primary ?: preview.primary,
+            secondaries = state.secondaries.mapIndexed { index, secondary ->
+                secondary.takeIf { it.value != null } ?: preview.secondaries[index]
+            },
+            zone = state.zone ?: preview.zone,
+            zoneCount = state.zoneCount.takeIf { it > 0 } ?: preview.zoneCount,
+        )
+    }
+
     fun previewState() = StackedFieldState(
         primary = primary.previewValue,
         secondaries = secondaries.map { SecondaryState(it.labelRes, it.previewValue) },

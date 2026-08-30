@@ -25,10 +25,20 @@
     <string name="field_power_stack">Power Stack</string>
     <string name="field_power_stack_description">Power, with normalized and ride average beneath it.</string>
 
+    <string name="field_cadence_stack">Cadence Stack</string>
+    <string name="field_cadence_stack_description">Cadence, with ride average and maximum beneath it.</string>
+
+    <string name="field_time_stack">Time Stack</string>
+    <string name="field_time_stack_description">Lap time, with the total elapsed time including stops beneath it.</string>
+
     <!-- Secondary row labels. Kept short: they render beneath the primary value. -->
     <string name="label_avg">avg</string>
     <string name="label_max">max</string>
-    <string name="label_norm">norm</string>
+    <string name="label_norm">NP</string>
+    <string name="label_total">total</string>
+
+    <!-- Drawn small after a value, for a metric whose number does not read on its own. -->
+    <string name="suffix_percent" translatable="false" formatted="false">%</string>
 
     <!-- Shown in place of a value whose stream has nothing to report. -->
     <string name="value_missing">--</string>

@@ -1,5 +1,6 @@
 package io.github.antmordel.kstack.render
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -32,18 +33,49 @@ import io.hammerhead.karooext.models.UserProfile
 import io.hammerhead.karooext.models.ViewConfig
 import androidx.compose.ui.unit.dp as composeDp
 
-/** Icon squares scale with the number beside them. */
-private const val ICON_RATIO = 0.8f
+/**
+ * Icon squares scale with the number beside them.
+ *
+ * Kept below the text: Karoo's own fields give the number the whole box, so every point the icon
+ * takes is width a stacked value does not have.
+ */
+private const val ICON_RATIO = 0.7f
 
 /**
  * Labels stay small and light while their value grows: the number is what a rider reads at a
- * glance, and `avg` only has to be identifiable. Chosen so the label keeps roughly the size it had
- * when the secondary values were smaller.
+ * glance, and `avg` only has to be identifiable. Lowered whenever the values grow, so the label
+ * keeps the absolute size it had rather than growing with them.
  */
-private const val LABEL_RATIO = 0.62f
+private const val LABEL_RATIO = 0.53f
+
+/** A suffix is punctuation on the number, not a second number: it stays clearly subordinate. */
+private const val SUFFIX_RATIO = 0.55f
+
+/** The two pairs on a row never touch, however wide their numbers get. */
+private const val MINIMUM_PAIR_GAP = 8
+
+/** The gap after a label, counted in digit-widths so it is part of the width estimate. */
+private const val GAP_UNITS = 0.6f
 
 /** Side by side, two secondaries cost one row instead of two — height the primary gets to keep. */
 private const val SECONDARIES_PER_ROW = 2
+
+/**
+ * One secondary as it will actually be drawn, formatted.
+ *
+ * Sizing needs the finished text: a value's width is a property of the string, not of the number.
+ */
+internal data class DrawnValue(val label: String, val value: String, val suffix: String) {
+    /**
+     * Character widths for this pair, with the smaller label and suffix counted at their own
+     * scale, plus a couple for the gap that follows the label.
+     */
+    fun widthUnits(): Float =
+        textWidthUnits(label) * LABEL_RATIO +
+            textWidthUnits(value) +
+            textWidthUnits(suffix) * SUFFIX_RATIO +
+            GAP_UNITS
+}
 
 /**
  * Groups secondaries into the rows the rider asked for. Pure, so the arrangement is testable
@@ -81,8 +113,27 @@ fun StackedFieldView(
     settings: FieldSettings,
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
-    val secondaryRows = state.secondaries.inSecondaryRows(settings.secondaryLayout)
-    val sizes = stackedTextSizes(config, secondaryRows.size, density)
+    val suffix = definition.suffixRes?.let { LocalContext.current.getString(it) }.orEmpty()
+    // Formatted before sizing, because how wide a row is depends on the text it ended up with.
+    val secondaryRows = state.secondaries
+        .map { secondary ->
+            DrawnValue(
+                label = secondary.labelRes?.let { LocalContext.current.getString(it) }.orEmpty(),
+                value = definition.formatter.formatOrDash(secondary.value, profile),
+                suffix = suffix,
+            )
+        }
+        .inSecondaryRows(settings.secondaryLayout)
+    val primaryText = definition.formatter.formatOrDash(state.primary, profile)
+    val sizes = stackedTextSizes(
+        config = config,
+        secondaryRowCount = secondaryRows.size,
+        primaryWidth = textWidthUnits(primaryText) + textWidthUnits(suffix) * SUFFIX_RATIO,
+        widestSecondaryRow = secondaryRows.maxOfOrNull { row ->
+            row.map { it.widthUnits() }.sum()
+        } ?: 0f,
+        density = density,
+    )
     val horizontalAlignment = config.alignment.toGlanceAlignment()
     // Null whenever there is no zone to colour by, which is also what a field with colouring off
     // and a field on a metric without zones both look like.
@@ -96,19 +147,32 @@ fun StackedFieldView(
     // Verbose, and only reachable in debug builds where a Timber tree is planted. The layout
     // constants here were set against a real Karoo, and this is how they were read back.
     timber.log.Timber.v(
-        "render %s density=%s sizes=%s primary=%s secondaries=%s",
+        "render %s view=%s grid=%s textSize=%s density=%s sizes=%s primary=%s secondaries=%s zone=%s/%s mode=%s",
         definition.fieldId,
+        config.viewSize,
+        config.gridSize,
+        config.textSize,
         density,
         sizes,
-        definition.formatter.formatOrDash(state.primary, profile),
-        state.secondaries.map { definition.formatter.formatOrDash(it.value, profile) },
+        primaryText,
+        secondaryRows.flatten().map { it.value },
+        state.zone,
+        state.zoneCount,
+        settings.zoneColorMode,
     )
 
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
             .let { if (background != null) it.background(ColorProvider(background)) else it }
-            .padding(horizontal = 10.composeDp, vertical = 2.composeDp),
+            // More room on the left than the right: the small labels start there, and hard against
+            // the boundary they read as clipped.
+            .padding(
+                start = 14.composeDp,
+                top = 2.composeDp,
+                end = 10.composeDp,
+                bottom = 2.composeDp,
+            ),
         horizontalAlignment = horizontalAlignment,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -121,13 +185,14 @@ fun StackedFieldView(
             )
             Spacer(modifier = GlanceModifier.size(4.composeDp))
             Text(
-                text = definition.formatter.formatOrDash(state.primary, profile),
+                text = primaryText,
                 style = TextStyle(
                     fontSize = sizes.primarySp.sp,
                     fontWeight = FontWeight.Bold,
                     color = contentColor,
                 ),
             )
+            Suffix(definition.suffixRes, sizes.primarySp, contentColor)
         }
 
         secondaryRows.forEach { row ->
@@ -135,13 +200,22 @@ fun StackedFieldView(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                row.forEachIndexed { index, secondary ->
+                // A row that is not full sits where the missing pair would have been, so the
+                // right edge lines up whether a field has one secondary or three.
+                if (settings.secondaryLayout == SecondaryLayout.SIDE_BY_SIDE &&
+                    row.size < SECONDARIES_PER_ROW
+                ) {
+                    Spacer(modifier = GlanceModifier.defaultWeight())
+                }
+                row.forEachIndexed { index, drawn ->
                     if (index > 0) {
+                        // A weighted spacer alone collapses to nothing once the row is full, which
+                        // is how `avg 27.0max 54.0` ran together on a Karoo.
                         Spacer(modifier = GlanceModifier.defaultWeight())
+                        Spacer(modifier = GlanceModifier.size(MINIMUM_PAIR_GAP.composeDp))
                     }
                     Text(
-                        text = secondary.labelRes?.let { LocalContext.current.getString(it) }
-                            .orEmpty(),
+                        text = drawn.label,
                         style = TextStyle(
                             fontSize = (sizes.secondarySp * LABEL_RATIO).sp,
                             color = contentColor,
@@ -149,17 +223,32 @@ fun StackedFieldView(
                     )
                     Spacer(modifier = GlanceModifier.size(3.composeDp))
                     Text(
-                        text = definition.formatter.formatOrDash(secondary.value, profile),
+                        text = drawn.value,
                         style = TextStyle(
                             fontSize = sizes.secondarySp.sp,
                             fontWeight = FontWeight.Bold,
                             color = contentColor,
                         ),
                     )
+                    Suffix(definition.suffixRes, sizes.secondarySp, contentColor)
                 }
             }
         }
     }
+}
+
+/** Nothing at all for a definition that names no suffix, which is most of them. */
+@Composable
+private fun Suffix(@StringRes suffixRes: Int?, valueSp: Float, color: ColorProvider) {
+    if (suffixRes == null) return
+    Text(
+        text = LocalContext.current.getString(suffixRes),
+        style = TextStyle(
+            fontSize = (valueSp * SUFFIX_RATIO).sp,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        ),
+    )
 }
 
 @Composable

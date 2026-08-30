@@ -26,3 +26,27 @@ fun speedFormatter(locale: Locale = Locale.getDefault()): ValueFormatter =
 
 private fun UserProfile?.isImperialDistance() =
     this?.preferredUnit?.distance == UserProfile.PreferredUnit.UnitType.IMPERIAL
+
+
+private const val SECONDS_PER_MINUTE = 60
+private const val SECONDS_PER_HOUR = 3600
+
+/**
+ * A duration as `h:mm:ss`, dropping to `m:ss` under an hour.
+ *
+ * Karoo's own time fields drop the hour until there is one, and a stacked field cannot spare the
+ * width for a leading `0:` that means nothing.
+ */
+fun durationFormatter(locale: Locale = Locale.getDefault()): ValueFormatter =
+    ValueFormatter { seconds, _ ->
+        val total = seconds.toLong().coerceAtLeast(0)
+        val hours = total / SECONDS_PER_HOUR
+        val minutes = total % SECONDS_PER_HOUR / SECONDS_PER_MINUTE
+        val remainder = total % SECONDS_PER_MINUTE
+        if (hours > 0) {
+            String.format(locale, "%d:%02d:%02d", hours, minutes, remainder)
+        } else {
+            String.format(locale, "%d:%02d", minutes, remainder)
+        }
+    }
+

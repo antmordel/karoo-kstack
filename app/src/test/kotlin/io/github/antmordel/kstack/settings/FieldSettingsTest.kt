@@ -16,8 +16,8 @@ class FieldSettingsTest {
     }
 
     @Test
-    fun `a field with nothing stored has zone colouring off`() {
-        assertEquals(ZoneColorMode.NONE, fieldSettingsFrom(null, null).zoneColorMode)
+    fun `a field with nothing stored colours its icon by zone`() {
+        assertEquals(ZoneColorMode.ICON, fieldSettingsFrom(null, null).zoneColorMode)
     }
 
     @Test
@@ -42,5 +42,6 @@ class FieldSettingsTest {
     fun `a value that is no longer a known option falls back to the default`() {
         // A downgrade, or a renamed enum entry, must leave a working field rather than crash.
         assertEquals(SecondaryLayout.SIDE_BY_SIDE, fieldSettingsFrom("DIAGONAL", null).secondaryLayout)
+        assertEquals(ZoneColorMode.ICON, fieldSettingsFrom(null, "BACKGROUND").zoneColorMode)
     }
 }
