@@ -30,31 +30,33 @@ private const val VERTICAL_PADDING_SP = 4f
 /**
  * Roughly the width of one bold digit as a fraction of its font size.
  *
- * Nothing is measured here, so the widest row is estimated from its character count. Digits and
- * lowercase label letters are close enough in this typeface for one ratio to cover both, and the
- * decimal point is narrower than either — this was tuned down from a first guess that left the
- * heart rate row two points smaller than the width it actually had.
+ * Nothing is measured here, so a row is estimated from its character count. Digits and lowercase
+ * label letters are close enough in this typeface for one ratio to cover both. Solved from the
+ * sizes at which real rows started clipping on a Karoo, not from the typeface metrics.
  */
-private const val CHAR_ADVANCE = 0.52f
+private const val CHAR_ADVANCE = 0.55f
 
-/** Left and right padding plus the gap between the two secondary pairs, in sp. */
-private const val HORIZONTAL_PADDING_SP = 26f
+/**
+ * Width a secondary row cannot use, in sp: the left and right padding, the gap that keeps the two
+ * pairs apart, and the gap after each label. Getting this sum wrong is what overflowed every row —
+ * it read 26 while the layout actually spends 38.
+ */
+private const val SECONDARY_RESERVED_SP = 14f + 10f + 8f + 3f + 3f
+
+/** Width the primary cannot use: the same padding, with no pairs to separate. */
+private const val PRIMARY_RESERVED_SP = 14f + 10f
 
 /** The icon sits beside the primary value and takes width from it, as a fraction of its size. */
-private const val ICON_WIDTH_RATIO = 0.9f
-
-/** Punctuation inside a value is far narrower than a digit: `12:34` is not five digits wide. */
-private const val NARROW_CHARS = ".:, "
-private const val NARROW_ADVANCE = 0.35f
+private const val ICON_WIDTH_RATIO = 0.8f
 
 /**
  * How many digit-widths a string occupies.
  *
- * Counting every character as a digit made `12:34` look five wide and drew Time Stack seven points
- * smaller than the fields beside it.
+ * Every character counts as one. Discounting punctuation looks more accurate and is not:
+ * [CHAR_ADVANCE] is an empirical figure that already absorbs spacing, so subtracting again on top
+ * of it overflowed every field — `12:34` wrapped onto two lines on a real Karoo.
  */
-fun textWidthUnits(text: String): Float =
-    text.sumOf { if (it in NARROW_CHARS) NARROW_ADVANCE.toDouble() else 1.0 }.toFloat()
+fun textWidthUnits(text: String): Float = text.length.toFloat()
 
 /**
  * Derives text sizes from the configuration Karoo supplies when the view starts.
@@ -84,11 +86,11 @@ fun stackedTextSizes(
 ): StackedTextSizes {
     val totalWeight = LINE_HEIGHT * (1f + SECONDARY_RATIO * secondaryRowCount)
     val availableHeightSp = config.viewSize.second / density - VERTICAL_PADDING_SP
-    val availableWidthSp = config.viewSize.first / density - HORIZONTAL_PADDING_SP
+    val widthSp = config.viewSize.first / density
 
     val fromHeight = availableHeightSp / totalWeight
     val primaryFromWidth = if (primaryWidth > 0f) {
-        availableWidthSp / (ICON_WIDTH_RATIO + primaryWidth * CHAR_ADVANCE)
+        (widthSp - PRIMARY_RESERVED_SP) / (ICON_WIDTH_RATIO + primaryWidth * CHAR_ADVANCE)
     } else {
         Float.MAX_VALUE
     }
@@ -98,7 +100,7 @@ fun stackedTextSizes(
     )
 
     val fromWidth = if (widestSecondaryRow > 0f) {
-        availableWidthSp / (widestSecondaryRow * CHAR_ADVANCE)
+        (widthSp - SECONDARY_RESERVED_SP) / (widestSecondaryRow * CHAR_ADVANCE)
     } else {
         Float.MAX_VALUE
     }

@@ -101,13 +101,10 @@ class TextScalingTest {
     }
 
     @Test
-    fun `punctuation counts for less than a digit`() {
-        // `12:34` is not five digits wide; counting it as five drew Time Stack seven points
-        // smaller than the fields beside it.
-        assertTrue(
-            "${textWidthUnits("12:34")} should be below 5",
-            textWidthUnits("12:34") < textWidthUnits("12345"),
-        )
+    fun `every character counts the same`() {
+        // Discounting punctuation double-counts the spacing CHAR_ADVANCE already absorbs, which
+        // wrapped `12:34` onto two lines on a real Karoo.
+        assertEquals(5f, textWidthUnits("12:34"), 0.01f)
         assertEquals(3f, textWidthUnits("142"), 0.01f)
     }
 
@@ -124,13 +121,28 @@ class TextScalingTest {
 
     @Test
     fun `the widest secondary row fits the width it was given`() {
-        val widthPx = 240
+        val widthPx = 600
         val row = 20f
-        val sizes = sizes(textSize = 40, heightPx = 4000, rows = 1, widestSecondaryRow = row, widthPx = widthPx)
+        val sizes = sizes(
+            textSize = 40,
+            heightPx = 4000,
+            rows = 1,
+            widestSecondaryRow = row,
+            widthPx = widthPx,
+        )
 
-        val usedPx = row * sizes.secondarySp * 0.62f * DENSITY
+        val usedPx = (row * sizes.secondarySp * 0.55f + 38f) * DENSITY
 
         assertTrue("used ${usedPx}px of ${widthPx}px", usedPx <= widthPx)
+    }
+
+    @Test
+    fun `legibility wins over fitting in a field too narrow for either`() {
+        // A row that cannot fit above the legibility floor overflows rather than shrinking into
+        // something unreadable at arm's length. Deliberate, and the only case where width loses.
+        val sizes = sizes(textSize = 40, heightPx = 4000, rows = 1, widestSecondaryRow = 20f, widthPx = 240)
+
+        assertEquals(9f, sizes.secondarySp, 0.01f)
     }
 
     @Test
@@ -169,7 +181,7 @@ class TextScalingTest {
             widthPx = widthPx,
         )
 
-        val usedPx = (0.9f + primaryWidth * 0.52f) * sizes.primarySp * DENSITY
+        val usedPx = (0.8f + primaryWidth * 0.55f) * sizes.primarySp * DENSITY + 24f * DENSITY
 
         assertTrue("used ${usedPx}px of ${widthPx}px", usedPx <= widthPx)
     }

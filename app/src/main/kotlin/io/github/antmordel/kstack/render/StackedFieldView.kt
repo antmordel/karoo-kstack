@@ -33,8 +33,13 @@ import io.hammerhead.karooext.models.UserProfile
 import io.hammerhead.karooext.models.ViewConfig
 import androidx.compose.ui.unit.dp as composeDp
 
-/** Icon squares scale with the number beside them. */
-private const val ICON_RATIO = 0.8f
+/**
+ * Icon squares scale with the number beside them.
+ *
+ * Kept below the text: Karoo's own fields give the number the whole box, so every point the icon
+ * takes is width a stacked value does not have.
+ */
+private const val ICON_RATIO = 0.7f
 
 /**
  * Labels stay small and light while their value grows: the number is what a rider reads at a
