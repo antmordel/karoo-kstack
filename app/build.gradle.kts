@@ -1,18 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "io.github.antmordel.kstack"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.github.antmordel.kstack"
         // Karoo 2 is the floor; Karoo 3 is newer. Do not raise without checking Karoo 2.
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 37
         versionCode = System.getenv("RELEASE_VERSION_CODE")?.toInt() ?: 1
         versionName = System.getenv("RELEASE_VERSION") ?: "0.1.0"
     }
@@ -40,11 +39,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
@@ -94,6 +90,12 @@ tasks.register("generateManifest") {
     }
 }
 
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+    }
+}
 
 dependencies {
     implementation(libs.hammerhead.karoo.ext)
