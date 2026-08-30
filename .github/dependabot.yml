@@ -1,0 +1,31 @@
+# Lint's GradleDependency and AndroidGradlePluginVersion checks are switched off in
+# app/build.gradle.kts because they fail on Google's release schedule rather than on anything in
+# this repo. This is where that signal belongs: a pull request CI can prove, not a broken build.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    # A freshly published version is the one most likely to be yanked or broken.
+    cooldown:
+      default-days: 7
+    # AGP, Gradle, Kotlin and compileSdk gate each other, so they are only ever worth reviewing
+    # together — a pull request raising one of them alone does not build.
+    groups:
+      gradle:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
