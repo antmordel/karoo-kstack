@@ -13,7 +13,10 @@ import io.hammerhead.karooext.models.UserProfile
 import io.hammerhead.karooext.models.ViewConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -49,9 +52,16 @@ class StackedDataType(
         val settings = settingsStore.settings(definition.fieldId)
 
         // The editor feeds the real data types, so a preview follows them and falls back to the
-        // definition's own numbers only for rows that have nothing yet.
-        val states = streams.stackedFieldStates(definition)
-            .map { if (config.preview) definition.withPreviewFallback(it) else it }
+        // definition's own numbers only for rows that have nothing yet. Those fall back to a value
+        // that sweeps, so an unpaired sensor previews as a field that is working rather than one
+        // that is stuck.
+        val states = if (config.preview) {
+            combine(streams.stackedFieldStates(definition), previewSweep()) { state, step ->
+                definition.withPreviewFallback(state, step)
+            }
+        } else {
+            streams.stackedFieldStates(definition)
+        }
 
         val job = combine(
             states,
@@ -70,4 +80,16 @@ class StackedDataType(
         emitter.setCancellable { job.cancel() }
     }
 
+}
+
+/** Karoo redraws its own fields about once a second; a preview that moves faster looks frantic. */
+private const val PREVIEW_TICK_MS = 1_000L
+
+/** Counts the seconds a data page has been open, which is all a preview needs to animate. */
+private fun previewSweep(): Flow<Int> = flow {
+    var step = 0
+    while (true) {
+        emit(step++)
+        delay(PREVIEW_TICK_MS)
+    }
 }
