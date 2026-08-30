@@ -33,6 +33,11 @@ jobs:
           packages: platform-tools platforms;android-35 build-tools;35.0.0
 
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          # The self-hosted runner is dedicated to this repo and keeps its Gradle home on a
+          # named volume, so the action's own cache layer has nothing to add. Left enabled it
+          # finds the pre-existing home and warns that caching was skipped on every run.
+          cache-disabled: true
 
       - name: Build, lint and test
         env:
