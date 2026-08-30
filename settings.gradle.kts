@@ -26,12 +26,12 @@ dependencyResolutionManagement {
         mavenCentral()
         // karoo-ext is published only to GitHub Packages, which always requires
         // authentication even though the package is public. Supply gpr.user/gpr.key in
-        // local.properties, or GITHUB_ACTOR/GITHUB_PACKAGES_TOKEN in the environment.
+        // local.properties, or GPR_USER/GPR_KEY in the environment.
         maven {
             url = uri("https://maven.pkg.github.com/hammerheadnav/karoo-ext")
             credentials {
-                username = credential("gpr.user", "GITHUB_ACTOR")
-                password = credential("gpr.key", "GITHUB_PACKAGES_TOKEN")
+                username = credential("gpr.user", "GPR_USER")
+                password = credential("gpr.key", "GPR_KEY")
             }
         }
     }
