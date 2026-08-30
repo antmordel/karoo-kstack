@@ -200,6 +200,13 @@ fun StackedFieldView(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                // A row that is not full sits where the missing pair would have been, so the
+                // right edge lines up whether a field has one secondary or three.
+                if (settings.secondaryLayout == SecondaryLayout.SIDE_BY_SIDE &&
+                    row.size < SECONDARIES_PER_ROW
+                ) {
+                    Spacer(modifier = GlanceModifier.defaultWeight())
+                }
                 row.forEachIndexed { index, drawn ->
                     if (index > 0) {
                         // A weighted spacer alone collapses to nothing once the row is full, which
