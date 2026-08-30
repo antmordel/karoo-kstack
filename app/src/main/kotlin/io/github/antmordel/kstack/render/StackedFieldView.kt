@@ -12,6 +12,7 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.size
 import androidx.glance.text.FontWeight
@@ -32,6 +33,12 @@ private const val ICON_RATIO = 0.8f
 
 /** Labels read as subordinate to the value they sit beside. */
 private const val LABEL_RATIO = 0.8f
+
+/**
+ * Secondaries pair up across a row rather than stacking. Two of them cost one row instead of two,
+ * which is height the primary gets to keep.
+ */
+private const val SECONDARIES_PER_ROW = 2
 
 /**
  * Content colour follows the device's day/night setting.
@@ -61,12 +68,23 @@ fun StackedFieldView(
     config: ViewConfig,
 ) {
     val density = LocalContext.current.resources.displayMetrics.density
-    val sizes = stackedTextSizes(config, state.secondaries.size, density)
+    val secondaryRows = state.secondaries.chunked(SECONDARIES_PER_ROW)
+    val sizes = stackedTextSizes(config, secondaryRows.size, density)
     val horizontalAlignment = config.alignment.toGlanceAlignment()
     val contentColor = contentColor()
+    // Verbose, and only reachable in debug builds where a Timber tree is planted. The layout
+    // constants here were set against a real Karoo, and this is how they were read back.
+    timber.log.Timber.v(
+        "render %s density=%s sizes=%s primary=%s secondaries=%s",
+        definition.fieldId,
+        density,
+        sizes,
+        definition.formatter.formatOrDash(state.primary, profile),
+        state.secondaries.map { definition.formatter.formatOrDash(it.value, profile) },
+    )
 
     Column(
-        modifier = GlanceModifier.fillMaxSize(),
+        modifier = GlanceModifier.fillMaxSize().padding(horizontal = 6.composeDp, vertical = 2.composeDp),
         horizontalAlignment = horizontalAlignment,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -88,27 +106,33 @@ fun StackedFieldView(
             )
         }
 
-        state.secondaries.forEach { secondary ->
+        secondaryRows.forEach { row ->
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = secondary.labelRes?.let { LocalContext.current.getString(it) }.orEmpty(),
-                    style = TextStyle(
-                        fontSize = (sizes.secondarySp * LABEL_RATIO).sp,
-                        color = contentColor,
-                    ),
-                )
-                Spacer(modifier = GlanceModifier.defaultWeight())
-                Text(
-                    text = definition.formatter.formatOrDash(secondary.value, profile),
-                    style = TextStyle(
-                        fontSize = sizes.secondarySp.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = contentColor,
-                    ),
-                )
+                row.forEachIndexed { index, secondary ->
+                    if (index > 0) {
+                        Spacer(modifier = GlanceModifier.defaultWeight())
+                    }
+                    Text(
+                        text = secondary.labelRes?.let { LocalContext.current.getString(it) }
+                            .orEmpty(),
+                        style = TextStyle(
+                            fontSize = (sizes.secondarySp * LABEL_RATIO).sp,
+                            color = contentColor,
+                        ),
+                    )
+                    Spacer(modifier = GlanceModifier.size(3.composeDp))
+                    Text(
+                        text = definition.formatter.formatOrDash(secondary.value, profile),
+                        style = TextStyle(
+                            fontSize = sizes.secondarySp.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor,
+                        ),
+                    )
+                }
             }
         }
     }

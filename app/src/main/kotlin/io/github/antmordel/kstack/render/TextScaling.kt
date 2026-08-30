@@ -10,14 +10,21 @@ data class StackedTextSizes(
     val secondarySp: Float,
 )
 
-/** Secondary rows read as subordinate at this fraction of the primary. */
-private const val SECONDARY_RATIO = 0.45f
+/** Secondary rows read as subordinate at this fraction of the primary. Set by eye on a Karoo. */
+private const val SECONDARY_RATIO = 0.38f
 
 /** Below this the numbers stop being readable at arm's length on a bike. */
 private const val MINIMUM_SP = 9f
 
-/** Rough allowance for row spacing and the field's own padding. */
-private const val VERTICAL_OVERHEAD = 0.88f
+/**
+ * A line of text occupies more vertical space than its font size — roughly this much, once
+ * ascent, descent and leading are counted. Measured against the Karoo: at 1.0 the bottom two rows
+ * vanished, at 1.3 the last row was still clipped in half.
+ */
+private const val LINE_HEIGHT = 1.45f
+
+/** Breathing room at the top and bottom, in sp, so text does not touch the field boundary. */
+private const val VERTICAL_PADDING_SP = 4f
 
 /**
  * Derives text sizes from the configuration Karoo supplies when the view starts.
@@ -28,15 +35,17 @@ private const val VERTICAL_OVERHEAD = 0.88f
  *
  * Pure by design — no view is measured, and nothing here needs a laid-out hierarchy.
  *
+ * @param secondaryRowCount rows of secondary values, not values: secondaries sit side by side, so
+ * two of them cost one row and leave the primary the height that buys.
  * @param density pixels per dp, from the display metrics.
  */
 fun stackedTextSizes(
     config: ViewConfig,
-    secondaryCount: Int,
+    secondaryRowCount: Int,
     density: Float,
 ): StackedTextSizes {
-    val totalWeight = 1f + SECONDARY_RATIO * secondaryCount
-    val availableSp = config.viewSize.second / density * VERTICAL_OVERHEAD
+    val totalWeight = LINE_HEIGHT * (1f + SECONDARY_RATIO * secondaryRowCount)
+    val availableSp = config.viewSize.second / density - VERTICAL_PADDING_SP
 
     val primarySp = max(MINIMUM_SP, min(config.textSize.toFloat(), availableSp / totalWeight))
     val secondarySp = max(MINIMUM_SP, primarySp * SECONDARY_RATIO)

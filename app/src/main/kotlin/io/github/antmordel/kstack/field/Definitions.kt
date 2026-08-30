@@ -18,7 +18,7 @@ object Definitions {
             StackedValue(DataType.Type.AVERAGE_HR, R.string.label_avg, previewValue = 128.0),
             StackedValue(DataType.Type.MAX_HR, R.string.label_max, previewValue = 176.0),
         ),
-        iconRes = R.drawable.ic_kstack,
+        iconRes = R.drawable.ic_heart,
     )
 
     val all = listOf(HeartRate)

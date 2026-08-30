@@ -7,6 +7,7 @@ import androidx.glance.appwidget.GlanceRemoteViews
 import io.github.antmordel.kstack.render.StackedFieldView
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.ViewEmitter
+import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.UserProfile
 import io.hammerhead.karooext.models.ViewConfig
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,11 @@ class StackedDataType(
     private val glance = GlanceRemoteViews()
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
+        // Karoo draws its own icon-and-name header above a graphical field by default. A stacked
+        // field carries its own icon and needs the whole box: with the header on, the rows are
+        // sized for height the field does not actually have and get clipped.
+        emitter.onNext(UpdateGraphicConfig(showHeader = false))
+
         if (config.preview) {
             renderPreview(context, config, emitter)
             return
