@@ -86,7 +86,8 @@ tasks.register("generateManifest") {
             "latestVersionCode" to versionCode,
             "developer" to "github.com/antmordel",
             "description" to "Stacked data fields: a large current value with smaller labelled " +
-                "values beneath it, for heart rate, heart rate percent, speed and power.",
+                "values beneath it, for heart rate, heart rate percent, speed, power, cadence " +
+                "and lap time, with optional zone colouring.",
             "tags" to listOf("data-fields"),
         )
         output.get().asFile.writeText(groovy.json.JsonBuilder(manifest).toPrettyString())
