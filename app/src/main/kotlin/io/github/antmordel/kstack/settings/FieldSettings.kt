@@ -14,6 +14,20 @@ enum class SecondaryLayout {
     }
 }
 
+/** Whether a field colours itself by the rider's current zone, and what it colours. */
+enum class ZoneColorMode {
+    /** No colouring. What every field did before this setting existed. */
+    NONE,
+
+    /** The metric icon takes the zone colour; every other pixel is unchanged. */
+    ICON,
+    ;
+
+    companion object {
+        val Default = NONE
+    }
+}
+
 /**
  * The rider's appearance choices for one field.
  *
@@ -21,6 +35,7 @@ enum class SecondaryLayout {
  */
 data class FieldSettings(
     val secondaryLayout: SecondaryLayout = SecondaryLayout.Default,
+    val zoneColorMode: ZoneColorMode = ZoneColorMode.Default,
 )
 
 /**
@@ -29,7 +44,10 @@ data class FieldSettings(
  * A value that is absent or no longer a known option falls back to the default, so a downgrade or
  * a renamed enum entry leaves the rider with a working field rather than a crash.
  */
-fun fieldSettingsFrom(storedLayout: String?): FieldSettings = FieldSettings(
-    secondaryLayout = SecondaryLayout.entries.firstOrNull { it.name == storedLayout }
-        ?: SecondaryLayout.Default,
-)
+fun fieldSettingsFrom(storedLayout: String?, storedZoneColorMode: String?): FieldSettings =
+    FieldSettings(
+        secondaryLayout = SecondaryLayout.entries.firstOrNull { it.name == storedLayout }
+            ?: SecondaryLayout.Default,
+        zoneColorMode = ZoneColorMode.entries.firstOrNull { it.name == storedZoneColorMode }
+            ?: ZoneColorMode.Default,
+    )

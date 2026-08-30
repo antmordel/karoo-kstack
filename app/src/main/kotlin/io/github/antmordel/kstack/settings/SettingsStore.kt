@@ -14,6 +14,8 @@ interface SettingsStore {
     fun settings(fieldId: String): Flow<FieldSettings>
 
     fun setSecondaryLayout(fieldId: String, layout: SecondaryLayout)
+
+    fun setZoneColorMode(fieldId: String, mode: ZoneColorMode)
 }
 
 /**
@@ -42,10 +44,18 @@ class SharedPreferencesSettingsStore(context: Context) : SettingsStore {
         preferences.edit().putString(layoutKey(fieldId), layout.name).apply()
     }
 
-    private fun read(fieldId: String) =
-        fieldSettingsFrom(preferences.getString(layoutKey(fieldId), null))
+    override fun setZoneColorMode(fieldId: String, mode: ZoneColorMode) {
+        preferences.edit().putString(zoneColorKey(fieldId), mode.name).apply()
+    }
+
+    private fun read(fieldId: String) = fieldSettingsFrom(
+        storedLayout = preferences.getString(layoutKey(fieldId), null),
+        storedZoneColorMode = preferences.getString(zoneColorKey(fieldId), null),
+    )
 
     private fun layoutKey(fieldId: String) = "$fieldId.secondaryLayout"
+
+    private fun zoneColorKey(fieldId: String) = "$fieldId.zoneColorMode"
 
     private companion object {
         const val FILE_NAME = "kstack-settings"

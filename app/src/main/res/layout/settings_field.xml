@@ -38,4 +38,39 @@
             android:layout_weight="1"
             android:text="@string/setting_layout_stacked" />
     </RadioGroup>
+
+    <!-- Hidden for a metric the rider has no zones for; MainActivity decides from the definition. -->
+    <LinearLayout
+        android:id="@+id/zone_color_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_zone_color"
+            android:textSize="13sp" />
+
+        <RadioGroup
+            android:id="@+id/zone_color_choice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/zone_color_none"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/setting_zone_color_none" />
+
+            <RadioButton
+                android:id="@+id/zone_color_icon"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/setting_zone_color_icon" />
+        </RadioGroup>
+    </LinearLayout>
 </LinearLayout>

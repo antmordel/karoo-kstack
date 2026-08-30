@@ -26,6 +26,7 @@ import io.github.antmordel.kstack.field.StackedFieldDefinition
 import io.github.antmordel.kstack.field.StackedFieldState
 import io.github.antmordel.kstack.settings.FieldSettings
 import io.github.antmordel.kstack.settings.SecondaryLayout
+import io.github.antmordel.kstack.settings.ZoneColorMode
 import io.hammerhead.karooext.models.UserProfile
 import io.hammerhead.karooext.models.ViewConfig
 import androidx.compose.ui.unit.dp as composeDp
@@ -83,6 +84,12 @@ fun StackedFieldView(
     val sizes = stackedTextSizes(config, secondaryRows.size, density)
     val horizontalAlignment = config.alignment.toGlanceAlignment()
     val contentColor = contentColor()
+    val iconColor = when (settings.zoneColorMode) {
+        ZoneColorMode.NONE -> contentColor
+        ZoneColorMode.ICON -> state.zone
+            ?.let { ColorProvider(zoneColor(it, state.zoneCount)) }
+            ?: contentColor
+    }
     // Verbose, and only reachable in debug builds where a Timber tree is planted. The layout
     // constants here were set against a real Karoo, and this is how they were read back.
     timber.log.Timber.v(
@@ -103,7 +110,7 @@ fun StackedFieldView(
             Image(
                 provider = ImageProvider(definition.iconRes),
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(contentColor),
+                colorFilter = ColorFilter.tint(iconColor),
                 modifier = GlanceModifier.size((sizes.primarySp * ICON_RATIO).composeDp),
             )
             Spacer(modifier = GlanceModifier.size(4.composeDp))

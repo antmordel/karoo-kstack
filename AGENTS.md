@@ -88,6 +88,20 @@ attaches it, `manifest.json` and `kstack.png` to the GitHub release.
   and republishes the previous version's numbers.
 - Losing the keystore means no user can ever update an installed KStack in place.
 
+## Zone colouring
+
+`HR_ZONE` and `POWER_ZONE` are native streams, so nothing derives a zone from thresholds. A
+definition names its zone stream and the profile list to size it against; a definition that names
+none renders exactly as it does with colouring off, which is what Speed Stack does.
+
+- **karoo-ext publishes no palette.** `UserProfile.Zone` is `(min, max)` and nothing else. The
+  colours live in `render/ZoneColors.kt`, matched by eye against the stock heart rate field, and a
+  Karoo OS change can drift from them.
+- **Colours are spread across the palette by position, not by index**, so a rider with seven power
+  zones and one with five heart rate zones both see the top zone in the top colour.
+- **`zoneIndex` assumes Karoo reports Z1 as 1**, matching how its own screens label zones. It is a
+  one-line change if a device says otherwise, and `ZonesTest` pins the behaviour either way.
+
 ## Settings are per field, and definition-driven
 
 Appearance choices are stored per `fieldId` and applied by the renderer, which receives them the

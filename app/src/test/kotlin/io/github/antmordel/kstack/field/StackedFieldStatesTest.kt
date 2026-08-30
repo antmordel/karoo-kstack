@@ -6,6 +6,7 @@ import io.hammerhead.karooext.models.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -14,6 +15,7 @@ import org.junit.Test
 private const val PRIMARY = "primary-type"
 private const val AVG = "avg-type"
 private const val MAX = "max-type"
+private const val ZONE = "zone-type"
 
 private const val LABEL_AVG = 1
 private const val LABEL_MAX = 2
@@ -21,7 +23,7 @@ private const val LABEL_MAX = 2
 private fun streaming(value: Double) =
     StreamState.Streaming(DataPoint("id", mapOf("field" to value)))
 
-private fun profile(maxHr: Int) = UserProfile(
+private fun profile(maxHr: Int, zoneCount: Int = 0) = UserProfile(
     weight = 70f,
     preferredUnit = UserProfile.PreferredUnit(
         distance = UserProfile.PreferredUnit.UnitType.METRIC,
@@ -31,7 +33,7 @@ private fun profile(maxHr: Int) = UserProfile(
     ),
     maxHr = maxHr,
     restingHr = 50,
-    heartRateZones = emptyList(),
+    heartRateZones = List(zoneCount) { UserProfile.Zone(min = it * 20, max = it * 20 + 19) },
     ftp = 250,
     powerZones = emptyList(),
 )
@@ -62,7 +64,64 @@ private val definition = StackedFieldDefinition(
     iconRes = 3,
 )
 
+private val zonedDefinition = definition.copy(
+    zone = ZoneSource(ZONE) { it.heartRateZones },
+)
+
 class StackedFieldStatesTest {
+
+    @Test
+    fun `the reported zone becomes an index into the rider's zones`() = runTest {
+        val source = FakeStreamSource(
+            streams = mapOf(
+                PRIMARY to MutableSharedFlow(),
+                AVG to MutableSharedFlow(),
+                MAX to MutableSharedFlow(),
+                ZONE to flowOf(streaming(4.0)),
+            ),
+            profiles = flowOf(profile(maxHr = 190, zoneCount = 5)),
+        )
+
+        val state = source.stackedFieldStates(zonedDefinition).first { it.zone != null }
+
+        assertEquals(3, state.zone)
+        assertEquals(5, state.zoneCount)
+    }
+
+    @Test
+    fun `a rider with no zones configured gets no zone to colour by`() = runTest {
+        val source = FakeStreamSource(
+            streams = mapOf(
+                PRIMARY to MutableSharedFlow(),
+                AVG to MutableSharedFlow(),
+                MAX to MutableSharedFlow(),
+                ZONE to flowOf(streaming(4.0)),
+            ),
+            profiles = flowOf(profile(maxHr = 190, zoneCount = 0)),
+        )
+
+        val state = source.stackedFieldStates(zonedDefinition).first { it.zoneCount == 0 }
+
+        assertNull(state.zone)
+    }
+
+    @Test
+    fun `a definition naming no zone stream still emits`() = runTest {
+        // The zone flow has to be seeded like every other, or the field would wait forever for a
+        // stream it never subscribed to.
+        val source = FakeStreamSource(
+            streams = mapOf(
+                PRIMARY to flowOf(streaming(140.0)),
+                AVG to MutableSharedFlow(),
+                MAX to MutableSharedFlow(),
+            ),
+            profiles = MutableSharedFlow(),
+        )
+
+        val state = source.stackedFieldStates(definition).first { it.primary != null }
+
+        assertNull(state.zone)
+    }
 
     @Test
     fun `emits before any stream has produced`() = runTest {

@@ -5,8 +5,10 @@ import io.hammerhead.karooext.models.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlin.math.roundToInt
 
 /**
  * Composes the streams a [definition] names into the state its field renders.
@@ -24,16 +26,26 @@ fun StreamSource.stackedFieldStates(
         it.toList()
     }
     val profiles = userProfile().map<UserProfile, UserProfile?> { it }.onStart { emit(null) }
+    // A definition with no zone source still needs a flow to combine, or the field would only
+    // draw once the other streams line up with something that never arrives.
+    val zones = definition.zone
+        ?.let { stream(it.dataTypeId).seededValues() }
+        ?: flowOf(null)
 
-    return combine(rawValues, profiles) { raws, profile ->
+    return combine(rawValues, profiles, zones) { raws, profile, reportedZone ->
         val transformed = values.mapIndexed { index, value ->
             raws[index]?.let { value.transform.apply(it, profile) }
         }
+        val zoneCount = definition.zone
+            ?.let { source -> profile?.let { source.zonesOf(it).size } }
+            ?: 0
         StackedFieldState(
             primary = transformed.first(),
             secondaries = definition.secondaries.mapIndexed { index, secondary ->
                 SecondaryState(secondary.labelRes, transformed[index + 1])
             },
+            zone = reportedZone?.let { zoneIndex(it.roundToInt(), zoneCount) },
+            zoneCount = zoneCount,
         )
     }.distinctUntilChanged()
 }
