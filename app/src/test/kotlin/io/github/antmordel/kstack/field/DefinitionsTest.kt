@@ -23,6 +23,24 @@ class DefinitionsTest {
     }
 
     @Test
+    fun `every definition names itself with the string the field picker shows`() {
+        // The settings screen labels its sections from nameRes while the picker labels the field
+        // from the XML. If they drift, the same field has two names on one device.
+        val xml = File("src/main/res/xml/extension_info.xml").readText()
+        val declaredNames = Regex("""typeId="([^"]+)"\s+displayName="@string/([^"]+)"""")
+            .findAll(xml)
+            .associate { it.groupValues[1] to it.groupValues[2] }
+
+        Definitions.all.forEach { definition ->
+            val resourceName = declaredNames.getValue(definition.fieldId)
+            val declared = io.github.antmordel.kstack.R.string::class.java
+                .getField(resourceName)
+                .getInt(null)
+            assertEquals(definition.fieldId, declared, definition.nameRes)
+        }
+    }
+
+    @Test
     fun `field ids are unique`() {
         val ids = Definitions.all.map { it.fieldId }
 

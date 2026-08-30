@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
 import androidx.glance.appwidget.GlanceRemoteViews
 import io.github.antmordel.kstack.render.StackedFieldView
+import io.github.antmordel.kstack.settings.SettingsStore
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.UpdateGraphicConfig
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 
 /**
  * The one graphical data type. Every KStack field is an instance of this class holding a different
@@ -31,6 +31,7 @@ class StackedDataType(
     extension: String,
     private val definition: StackedFieldDefinition,
     private val streams: StreamSource,
+    private val settingsStore: SettingsStore,
 ) : DataTypeImpl(extension, definition.fieldId) {
 
     private val glance = GlanceRemoteViews()
@@ -50,12 +51,18 @@ class StackedDataType(
             .map<UserProfile, UserProfile?> { it }
             .onStart { emit(null) }
 
-        val job = combine(streams.stackedFieldStates(definition), profiles) { state, profile ->
-            state to profile
-        }.onEach { (state, profile) ->
+        val settings = settingsStore.settings(definition.fieldId)
+
+        val job = combine(
+            streams.stackedFieldStates(definition),
+            profiles,
+            settings,
+        ) { state, profile, fieldSettings ->
+            Triple(state, profile, fieldSettings)
+        }.onEach { (state, profile, fieldSettings) ->
             // GlanceRemoteViews.compose suspends, so composition lives on this collector.
             val result = glance.compose(context, DpSize.Unspecified) {
-                StackedFieldView(definition, state, profile, config)
+                StackedFieldView(definition, state, profile, config, fieldSettings)
             }
             emitter.updateView(result.remoteViews)
         }.launchIn(CoroutineScope(Dispatchers.IO))
@@ -63,14 +70,24 @@ class StackedDataType(
         emitter.setCancellable { job.cancel() }
     }
 
-    /** The editor shows a static, plausible field: no streams are running there to subscribe to. */
+    /**
+     * The editor shows a plausible field with no streams running: nothing is producing values
+     * there to subscribe to. Settings are still followed, so the preview matches what the rider
+     * will actually get on the page.
+     */
     private fun renderPreview(context: Context, config: ViewConfig, emitter: ViewEmitter) {
-        val job = CoroutineScope(Dispatchers.IO).launch {
+        val job = settingsStore.settings(definition.fieldId).onEach { fieldSettings ->
             val result = glance.compose(context, DpSize.Unspecified) {
-                StackedFieldView(definition, definition.previewState(), profile = null, config = config)
+                StackedFieldView(
+                    definition = definition,
+                    state = definition.previewState(),
+                    profile = null,
+                    config = config,
+                    settings = fieldSettings,
+                )
             }
             emitter.updateView(result.remoteViews)
-        }
+        }.launchIn(CoroutineScope(Dispatchers.IO))
         emitter.setCancellable { job.cancel() }
     }
 }

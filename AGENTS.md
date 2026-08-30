@@ -88,7 +88,20 @@ attaches it, `manifest.json` and `kstack.png` to the GitHub release.
   and republishes the previous version's numbers.
 - Losing the keystore means no user can ever update an installed KStack in place.
 
+## Settings are per field, and definition-driven
+
+Appearance choices are stored per `fieldId` and applied by the renderer, which receives them the
+same way it receives the definition. The settings screen builds itself from `Definitions.all`, so a
+field added later appears there with no UI change.
+
+Persistence is `SharedPreferences`. Its change listener only fires in the process that wrote the
+value, which works because the settings screen and the extension service share one process —
+neither declares `android:process`. Splitting them would silently stop a placed field from
+reacting to a setting change.
+
 ## Non-goals
 
-No companion app. No settings UI — secondary rows are fixed per definition. No zone coloring
-(BigNum covers it). No graphs (sk0711-graph covers it). Do not add these speculatively.
+No companion app. No graphs (sk0711-graph covers it). No unit suffix beside a value — Karoo's own
+speed fields show none either. Which secondary rows a field shows is not rider-selectable; the
+settings screen could host it, but the catalog of selectable rows per metric is undecided. Do not
+add these speculatively.
