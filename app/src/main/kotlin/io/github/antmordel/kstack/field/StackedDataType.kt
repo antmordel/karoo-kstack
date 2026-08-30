@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 /**
  * The one graphical data type. Every KStack field is an instance of this class holding a different
@@ -34,6 +35,11 @@ class StackedDataType(
     private val glance = GlanceRemoteViews()
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
+        if (config.preview) {
+            renderPreview(context, config, emitter)
+            return
+        }
+
         val profiles = streams.userProfile()
             .map<UserProfile, UserProfile?> { it }
             .onStart { emit(null) }
@@ -48,6 +54,17 @@ class StackedDataType(
             emitter.updateView(result.remoteViews)
         }.launchIn(CoroutineScope(Dispatchers.IO))
 
+        emitter.setCancellable { job.cancel() }
+    }
+
+    /** The editor shows a static, plausible field: no streams are running there to subscribe to. */
+    private fun renderPreview(context: Context, config: ViewConfig, emitter: ViewEmitter) {
+        val job = CoroutineScope(Dispatchers.IO).launch {
+            val result = glance.compose(context, DpSize.Unspecified) {
+                StackedFieldView(definition, definition.previewState(), profile = null, config = config)
+            }
+            emitter.updateView(result.remoteViews)
+        }
         emitter.setCancellable { job.cancel() }
     }
 }

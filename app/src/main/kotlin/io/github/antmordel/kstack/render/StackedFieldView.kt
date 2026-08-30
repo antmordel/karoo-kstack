@@ -3,6 +3,7 @@ package io.github.antmordel.kstack.render
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
+import androidx.glance.ColorFilter
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
@@ -16,6 +17,9 @@ import androidx.glance.layout.size
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import android.content.res.Configuration
+import androidx.compose.ui.graphics.Color
+import androidx.glance.unit.ColorProvider
 import io.github.antmordel.kstack.R
 import io.github.antmordel.kstack.field.StackedFieldDefinition
 import io.github.antmordel.kstack.field.StackedFieldState
@@ -25,6 +29,22 @@ import androidx.compose.ui.unit.dp as composeDp
 
 /** Icon squares scale with the number beside them. */
 private const val ICON_RATIO = 0.8f
+
+/** Labels read as subordinate to the value they sit beside. */
+private const val LABEL_RATIO = 0.8f
+
+/**
+ * Content colour follows the device's day/night setting.
+ *
+ * Glance defaults text to black. A Karoo in night mode draws fields on black, so the default makes
+ * every number invisible — which is exactly what the first on-device run showed.
+ */
+@Composable
+private fun contentColor(): androidx.glance.unit.ColorProvider {
+    val uiMode = LocalContext.current.resources.configuration.uiMode
+    val night = uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+    return ColorProvider(if (night) Color.White else Color.Black)
+}
 
 /**
  * Draws any stacked field: the primary value large with the metric icon, then one small labeled
@@ -43,6 +63,7 @@ fun StackedFieldView(
     val density = LocalContext.current.resources.displayMetrics.density
     val sizes = stackedTextSizes(config, state.secondaries.size, density)
     val horizontalAlignment = config.alignment.toGlanceAlignment()
+    val contentColor = contentColor()
 
     Column(
         modifier = GlanceModifier.fillMaxSize(),
@@ -53,12 +74,17 @@ fun StackedFieldView(
             Image(
                 provider = ImageProvider(definition.iconRes),
                 contentDescription = null,
+                colorFilter = ColorFilter.tint(contentColor),
                 modifier = GlanceModifier.size((sizes.primarySp * ICON_RATIO).composeDp),
             )
             Spacer(modifier = GlanceModifier.size(4.composeDp))
             Text(
                 text = definition.formatter.formatOrDash(state.primary, profile),
-                style = TextStyle(fontSize = sizes.primarySp.sp, fontWeight = FontWeight.Bold),
+                style = TextStyle(
+                    fontSize = sizes.primarySp.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor,
+                ),
             )
         }
 
@@ -69,12 +95,19 @@ fun StackedFieldView(
             ) {
                 Text(
                     text = secondary.labelRes?.let { LocalContext.current.getString(it) }.orEmpty(),
-                    style = TextStyle(fontSize = sizes.secondarySp.sp),
+                    style = TextStyle(
+                        fontSize = (sizes.secondarySp * LABEL_RATIO).sp,
+                        color = contentColor,
+                    ),
                 )
                 Spacer(modifier = GlanceModifier.defaultWeight())
                 Text(
                     text = definition.formatter.formatOrDash(secondary.value, profile),
-                    style = TextStyle(fontSize = sizes.secondarySp.sp, fontWeight = FontWeight.Bold),
+                    style = TextStyle(
+                        fontSize = sizes.secondarySp.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = contentColor,
+                    ),
                 )
             }
         }

@@ -13,10 +13,10 @@ object Definitions {
 
     val HeartRate = StackedFieldDefinition(
         fieldId = "hr-stack",
-        primary = StackedValue(DataType.Type.HEART_RATE),
+        primary = StackedValue(DataType.Type.HEART_RATE, previewValue = 142.0),
         secondaries = listOf(
-            StackedValue(DataType.Type.AVERAGE_HR, R.string.label_avg),
-            StackedValue(DataType.Type.MAX_HR, R.string.label_max),
+            StackedValue(DataType.Type.AVERAGE_HR, R.string.label_avg, previewValue = 128.0),
+            StackedValue(DataType.Type.MAX_HR, R.string.label_max, previewValue = 176.0),
         ),
         iconRes = R.drawable.ic_kstack,
     )

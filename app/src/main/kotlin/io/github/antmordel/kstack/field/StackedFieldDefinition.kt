@@ -29,11 +29,14 @@ fun interface ValueTransform {
  *
  * @property dataTypeId a [io.hammerhead.karooext.models.DataType.Type] constant.
  * @property labelRes short label drawn beside the value; `null` for the primary, which has none.
+ * @property previewValue plausible reading shown while the rider is editing a data page, where no
+ * sensor is streaming. Already in display terms, so no transform is applied to it.
  */
 data class StackedValue(
     val dataTypeId: String,
     @StringRes val labelRes: Int? = null,
     val transform: ValueTransform = ValueTransform.Identity,
+    val previewValue: Double = 0.0,
 )
 
 /**
@@ -65,4 +68,13 @@ data class StackedFieldDefinition(
     val secondaries: List<StackedValue>,
     @DrawableRes val iconRes: Int,
     val formatter: ValueFormatter = ValueFormatter.Plain,
-)
+) {
+    /**
+     * What the field shows in the data page editor. Karoo streams nothing there, and a rider
+     * arranging a page needs to see the shape of the field rather than a column of dashes.
+     */
+    fun previewState() = StackedFieldState(
+        primary = primary.previewValue,
+        secondaries = secondaries.map { SecondaryState(it.labelRes, it.previewValue) },
+    )
+}
