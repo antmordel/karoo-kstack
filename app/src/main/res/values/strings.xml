@@ -8,6 +8,9 @@
     <string name="setting_secondary_layout">Secondary values</string>
     <string name="setting_layout_side_by_side">Side by side</string>
     <string name="setting_layout_stacked">Stacked</string>
+    <string name="setting_zone_color">Zone colour</string>
+    <string name="setting_zone_color_none">Off</string>
+    <string name="setting_zone_color_icon">Icon</string>
 
     <string name="field_hr_stack">HR Stack</string>
     <string name="field_hr_stack_description">Heart rate, with ride average and maximum beneath it.</string>

@@ -16,4 +16,11 @@ data class SecondaryState(
 data class StackedFieldState(
     val primary: Double?,
     val secondaries: List<SecondaryState>,
+    /**
+     * The rider's current zone, as Karoo reports it, or `null` when the definition names no zone
+     * stream, the stream has nothing to say, or the rider has configured no zones.
+     */
+    val zone: Int? = null,
+    /** How many zones the rider has configured for this metric. Zero when none are. */
+    val zoneCount: Int = 0,
 )

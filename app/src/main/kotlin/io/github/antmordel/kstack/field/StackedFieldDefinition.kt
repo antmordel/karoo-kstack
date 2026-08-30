@@ -69,6 +69,12 @@ data class StackedFieldDefinition(
     val primary: StackedValue,
     val secondaries: List<StackedValue>,
     @DrawableRes val iconRes: Int,
+    /**
+     * The Karoo stream reporting the rider's current zone for this metric, and the profile zones
+     * to size it against. `null` for a metric with no zones, which renders exactly as it does
+     * with colouring switched off.
+     */
+    val zone: ZoneSource? = null,
     val formatter: ValueFormatter = ValueFormatter.Plain,
 ) {
     /**
@@ -78,5 +84,27 @@ data class StackedFieldDefinition(
     fun previewState() = StackedFieldState(
         primary = primary.previewValue,
         secondaries = secondaries.map { SecondaryState(it.labelRes, it.previewValue) },
+        // A mid zone, so a rider previewing a coloured field in the editor sees the colouring
+        // rather than a field that looks like colouring never took effect.
+        zone = zone?.let { PREVIEW_ZONE },
+        zoneCount = zone?.let { PREVIEW_ZONE_COUNT } ?: 0,
     )
+
+    private companion object {
+        /** Zone 4 of 5: high enough that the colour is obviously not the uncoloured default. */
+        const val PREVIEW_ZONE = 3
+        const val PREVIEW_ZONE_COUNT = 5
+    }
 }
+
+/**
+ * Where a field's zone colouring comes from: the Karoo stream carrying the current zone, and the
+ * list on the rider's profile that says how many zones there are.
+ *
+ * Both are named by the definition, so power zones work without the renderer learning what a zone
+ * is — the same rule the value streams follow.
+ */
+data class ZoneSource(
+    val dataTypeId: String,
+    val zonesOf: (UserProfile) -> List<UserProfile.Zone>,
+)
