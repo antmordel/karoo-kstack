@@ -12,6 +12,8 @@ aggregates small underneath — three numbers in the space of one.
 
 Compatible with Karoo 2 and Karoo 3.
 
+![Six KStack fields on a Karoo data page](fields.png)
+
 ## Fields
 
 | Field | Large | Underneath |
@@ -19,9 +21,11 @@ Compatible with Karoo 2 and Karoo 3.
 | HR Stack | Heart rate | avg, max |
 | HR% Stack | Heart rate as a percentage of your max HR | avg, max |
 | Speed Stack | Speed | avg, max |
-| Power Stack | Power | norm, avg |
+| Power Stack | Power | NP, avg |
+| Cadence Stack | Cadence | avg, max |
+| Time Stack | Lap time | total elapsed, stops included |
 
-All four are graphical fields and scale their text to whatever grid size you place them in.
+All six are graphical fields and scale their text to whatever grid size you place them in.
 
 The aggregates are Karoo's own `AVERAGE_*` and `MAX_*` data types, so they match the stock fields
 exactly and follow the same pause and reset behaviour. HR% divides those same heart rate values by
@@ -30,6 +34,17 @@ the max HR in your Karoo user profile; if you have not set one, those rows stay 
 Speed is shown in km/h or mph according to the unit preference in your Karoo profile. Rows resolve
 independently: a sensor that is not connected shows `--` on its own row while the others keep
 updating.
+
+## Zone colouring and settings
+
+Open KStack from the main menu to reach its settings. Each field has its own:
+
+- **Zone colour** — off, the metric icon in the colour of your current zone, or the whole field
+  background in it with the text following. Heart rate and power have zones; speed, cadence and
+  time do not, so those fields offer no colour choice.
+- **Secondary values** — side by side, or stacked one per row.
+
+Changes apply to fields already on a data page, without re-adding them.
 
 ## Installation
 
