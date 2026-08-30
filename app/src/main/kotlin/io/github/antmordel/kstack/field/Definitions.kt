@@ -62,6 +62,7 @@ object Definitions {
             ),
         ),
         iconRes = R.drawable.ic_heart,
+        suffixRes = R.string.suffix_percent,
     )
 
     val Speed = StackedFieldDefinition(
@@ -88,5 +89,33 @@ object Definitions {
         iconRes = R.drawable.ic_power,
     )
 
-    val all = listOf(HeartRate, HeartRatePercent, Speed, Power)
+    val Cadence = StackedFieldDefinition(
+        fieldId = "cadence-stack",
+        nameRes = R.string.field_cadence_stack,
+        primary = StackedValue(DataType.Type.CADENCE, previewValue = 88.0),
+        secondaries = listOf(
+            StackedValue(DataType.Type.AVERAGE_CADENCE, R.string.label_avg, previewValue = 84.0),
+            StackedValue(DataType.Type.MAX_CADENCE, R.string.label_max, previewValue = 112.0),
+        ),
+        iconRes = R.drawable.ic_cadence,
+    )
+
+    /**
+     * Lap time with the ride's total elapsed time beneath it.
+     *
+     * Moving time and the time of day are deliberately absent: Karoo already draws both in the
+     * status bar above every ride page, so a field spending rows on them would be duplication.
+     */
+    val Time = StackedFieldDefinition(
+        fieldId = "time-stack",
+        nameRes = R.string.field_time_stack,
+        primary = StackedValue(DataType.Type.ELAPSED_TIME_LAP, previewValue = 754.0),
+        secondaries = listOf(
+            StackedValue(DataType.Type.ELAPSED_TIME, R.string.label_total, previewValue = 5310.0),
+        ),
+        iconRes = R.drawable.ic_time,
+        formatter = durationFormatter(),
+    )
+
+    val all = listOf(HeartRate, HeartRatePercent, Speed, Power, Cadence, Time)
 }

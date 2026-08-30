@@ -37,4 +37,18 @@
         description="@string/field_power_stack_description"
         graphical="true"
         icon="@drawable/ic_power" />
+
+    <DataType
+        typeId="cadence-stack"
+        displayName="@string/field_cadence_stack"
+        description="@string/field_cadence_stack_description"
+        graphical="true"
+        icon="@drawable/ic_cadence" />
+
+    <DataType
+        typeId="time-stack"
+        displayName="@string/field_time_stack"
+        description="@string/field_time_stack_description"
+        graphical="true"
+        icon="@drawable/ic_time" />
 </ExtensionInfo>

@@ -42,19 +42,19 @@ class StackedDataType(
         // sized for height the field does not actually have and get clipped.
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
-        if (config.preview) {
-            renderPreview(context, config, emitter)
-            return
-        }
-
         val profiles = streams.userProfile()
             .map<UserProfile, UserProfile?> { it }
             .onStart { emit(null) }
 
         val settings = settingsStore.settings(definition.fieldId)
 
+        // The editor feeds the real data types, so a preview follows them and falls back to the
+        // definition's own numbers only for rows that have nothing yet.
+        val states = streams.stackedFieldStates(definition)
+            .map { if (config.preview) definition.withPreviewFallback(it) else it }
+
         val job = combine(
-            streams.stackedFieldStates(definition),
+            states,
             profiles,
             settings,
         ) { state, profile, fieldSettings ->
@@ -70,24 +70,4 @@ class StackedDataType(
         emitter.setCancellable { job.cancel() }
     }
 
-    /**
-     * The editor shows a plausible field with no streams running: nothing is producing values
-     * there to subscribe to. Settings are still followed, so the preview matches what the rider
-     * will actually get on the page.
-     */
-    private fun renderPreview(context: Context, config: ViewConfig, emitter: ViewEmitter) {
-        val job = settingsStore.settings(definition.fieldId).onEach { fieldSettings ->
-            val result = glance.compose(context, DpSize.Unspecified) {
-                StackedFieldView(
-                    definition = definition,
-                    state = definition.previewState(),
-                    profile = null,
-                    config = config,
-                    settings = fieldSettings,
-                )
-            }
-            emitter.updateView(result.remoteViews)
-        }.launchIn(CoroutineScope(Dispatchers.IO))
-        emitter.setCancellable { job.cancel() }
-    }
 }
