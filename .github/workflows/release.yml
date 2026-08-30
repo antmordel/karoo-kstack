@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    # Same runner pool as CI; see .github/workflows/ci.yml for why the label set is this broad.
+    runs-on: [self-hosted, linux, x64]
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
+        with:
+          packages: platform-tools platforms;android-35 build-tools;35.0.0
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          cache-disabled: true
+
+      - name: Decode the signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          # RUNNER_TEMP is wiped between jobs, which matters here because the runner host is
+          # long-lived. The explicit shred below covers a job that fails before that happens.
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/kstack.jks"
+          test -s "$RUNNER_TEMP/kstack.jks"
+
+      - name: Build the signed release APK
+        env:
+          GPR_USER: ${{ github.repository_owner }}
+          GPR_KEY: ${{ secrets.GPR_KEY }}
+          KEYSTORE_FILE: ${{ runner.temp }}/kstack.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          # Tags are vX.Y.Z; the APK carries X.Y.Z. The run number gives a versionCode that
+          # only ever increases, which Android requires for an in-place update.
+          RELEASE_VERSION: ${{ github.ref_name }}
+          RELEASE_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          RELEASE_VERSION="${RELEASE_VERSION#v}"
+          export RELEASE_VERSION
+          ./gradlew assembleRelease generateManifest
+
+      - name: Verify the APK is signed
+        run: |
+          # An unsigned APK builds and uploads happily, and only fails at install time on the
+          # Karoo. Fail here instead, where the tag can still be moved.
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs \
+            app/build/outputs/apk/release/app-release.apk
+
+      - name: Publish the release
+        # zizmor: ignore[superfluous-actions]
+        # zizmor suggests `gh release` instead. The myoung34/github-runner image these
+        # runners use does not ship the gh CLI, so the action is what actually works here.
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          make_latest: true
+          files: |
+            app/build/outputs/apk/release/app-release.apk
+            app/build/manifest.json
+            app/kstack.png
+
+      - name: Remove the decoded keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/kstack.jks"

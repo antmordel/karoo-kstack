@@ -67,8 +67,26 @@ Runners are defined outside this repo, in `antmordel/ballix-infra` at
 `self-hosted,linux,x64` — isolation comes from `RUNNER_SCOPE=repo`, not from labels, so workflows
 use `runs-on: [self-hosted, linux, x64]` and nothing more specific.
 
-The runner image carries **no JDK and no Android SDK**. Build jobs run in a container with the SDK,
-using the docker socket already mounted on the runner. Do not install a toolchain onto the VPS.
+The runner image (`myoung34/github-runner`) carries **no JDK, no Android SDK, and no `gh` CLI**.
+Workflows install the toolchain per job with `setup-java` and `setup-android`; anything needing the
+GitHub API needs an action rather than a `gh` script step.
+
+## Releasing
+
+Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds a signed `app-release.apk` and
+attaches it, `manifest.json` and `kstack.png` to the GitHub release.
+
+- `versionName` comes from the tag with the `v` stripped; `versionCode` from `github.run_number`, so
+  it only ever increases. Android refuses an in-place update otherwise.
+- Signing reads `KEYSTORE_FILE`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` from the
+  environment. With none of them set the release build is unsigned, so a local `assembleRelease`
+  still works — it just produces `app-release-unsigned.apk`, which will not install.
+- The keystore lives in the `KEYSTORE_BASE64` repo secret, is decoded into `RUNNER_TEMP`, and is
+  removed in an `always()` step because the runner host is long-lived.
+- `manifest.json` is generated, never committed, so the version it advertises cannot drift from the
+  APK beside it. The task declares its version inputs; without them Gradle skips it as UP-TO-DATE
+  and republishes the previous version's numbers.
+- Losing the keystore means no user can ever update an installed KStack in place.
 
 ## Non-goals
 
