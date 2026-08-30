@@ -62,12 +62,13 @@ object Definitions {
 
     val Speed = StackedFieldDefinition(
         fieldId = "speed-stack",
-        primary = StackedValue(DataType.Type.SPEED, previewValue = 32.0),
+        primary = StackedValue(DataType.Type.SPEED, previewValue = 8.9),
         secondaries = listOf(
-            StackedValue(DataType.Type.AVERAGE_SPEED, R.string.label_avg, previewValue = 27.0),
-            StackedValue(DataType.Type.MAX_SPEED, R.string.label_max, previewValue = 54.0),
+            StackedValue(DataType.Type.AVERAGE_SPEED, R.string.label_avg, previewValue = 7.5),
+            StackedValue(DataType.Type.MAX_SPEED, R.string.label_max, previewValue = 15.0),
         ),
         iconRes = R.drawable.ic_speed,
+        formatter = speedFormatter(),
     )
 
     val Power = StackedFieldDefinition(
