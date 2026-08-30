@@ -32,6 +32,17 @@ jobs:
         with:
           packages: platform-tools platforms;android-35 build-tools;35.0.0
 
+      - name: DIAG gradle home state
+        run: |
+          echo "HOME=$HOME GRADLE_USER_HOME=${GRADLE_USER_HOME:-unset}"
+          echo "--- /root/.gradle exists?"; ls -la /root/.gradle 2>&1 | head -20
+          echo "--- wrapper dists"; ls -la /root/.gradle/wrapper/dists 2>&1 | head
+          echo "--- caches/modules-2 size"; du -sh /root/.gradle/caches/modules-2 2>&1
+          echo "--- total .gradle size"; du -sh /root/.gradle 2>&1
+          echo "--- container id / hostname"; hostname; cat /etc/hostname
+          echo "--- uptime"; uptime
+          echo "--- mounts on /root"; mount | grep -i root || echo "no /root mount"
+
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
       - name: Build, lint and test
