@@ -31,7 +31,8 @@ division, no state, and it gets a max row that Karoo does not publish natively.
 
 - **karoo-ext resolves only from GitHub Packages, and always needs auth** — even though the package
   is public. Set `gpr.user` / `gpr.key` in `local.properties`, or `GPR_USER` / `GPR_KEY` in the
-  environment. Secrets and env vars cannot be named `GITHUB_*` — GitHub reserves that prefix. A clean clone does not build without credentials.
+  environment. Secrets and env vars cannot be named `GITHUB_*` — GitHub reserves that prefix. A
+  clean clone does not build without credentials.
 - **CI cannot use the automatic `GITHUB_TOKEN`** for that: it is scoped to this repo and cannot read
   another org's packages. A PAT with `read:packages` must exist as a repo secret.
 - **`KarooExtension.types` and `res/xml/extension_info.xml` must agree.** A definition missing from
