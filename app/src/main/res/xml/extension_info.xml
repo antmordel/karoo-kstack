@@ -10,9 +10,9 @@
     scansDevices="false">
 
     <DataType
-        typeId="placeholder-stack"
-        displayName="@string/field_placeholder"
-        description="@string/field_placeholder_description"
+        typeId="hr-stack"
+        displayName="@string/field_hr_stack"
+        description="@string/field_hr_stack_description"
         graphical="true"
         icon="@drawable/ic_kstack" />
 </ExtensionInfo>

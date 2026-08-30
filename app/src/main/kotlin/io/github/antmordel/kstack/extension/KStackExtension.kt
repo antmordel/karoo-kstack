@@ -1,8 +1,11 @@
 package io.github.antmordel.kstack.extension
 
-import io.github.antmordel.kstack.field.PlaceholderDataType
+import io.github.antmordel.kstack.field.Definitions
+import io.github.antmordel.kstack.field.KarooStreamSource
+import io.github.antmordel.kstack.field.StackedDataType
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
+import io.github.antmordel.kstack.BuildConfig
 import io.hammerhead.karooext.extension.KarooExtension
 import timber.log.Timber
 
@@ -18,11 +21,17 @@ class KStackExtension : KarooExtension(EXTENSION_ID, EXTENSION_VERSION) {
     private lateinit var karooSystem: KarooSystemService
 
     override val types: List<DataTypeImpl> by lazy {
-        listOf(PlaceholderDataType(extension))
+        val streams = KarooStreamSource(karooSystem)
+        Definitions.all.map { StackedDataType(extension, it, streams) }
     }
 
     override fun onCreate() {
         super.onCreate()
+        // karoo-ext logs through Timber, and Timber discards everything until a tree is planted.
+        // Without this the extension is silent in logcat, which makes on-device debugging blind.
+        if (BuildConfig.DEBUG && Timber.treeCount == 0) {
+            Timber.plant(Timber.DebugTree())
+        }
         karooSystem = KarooSystemService(this)
         karooSystem.connect { connected ->
             Timber.i("Karoo system connected: %b", connected)

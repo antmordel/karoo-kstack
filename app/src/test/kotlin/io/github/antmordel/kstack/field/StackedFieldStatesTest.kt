@@ -58,6 +58,7 @@ private val definition = StackedFieldDefinition(
         StackedValue(AVG, LABEL_AVG),
         StackedValue(MAX, LABEL_MAX),
     ),
+    iconRes = 3,
 )
 
 class StackedFieldStatesTest {
