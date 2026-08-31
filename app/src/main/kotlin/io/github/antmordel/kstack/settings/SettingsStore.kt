@@ -2,6 +2,7 @@ package io.github.antmordel.kstack.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
@@ -41,11 +42,11 @@ class SharedPreferencesSettingsStore(context: Context) : SettingsStore {
     }.distinctUntilChanged()
 
     override fun setSecondaryLayout(fieldId: String, layout: SecondaryLayout) {
-        preferences.edit().putString(layoutKey(fieldId), layout.name).apply()
+        preferences.edit { putString(layoutKey(fieldId), layout.name) }
     }
 
     override fun setZoneColorMode(fieldId: String, mode: ZoneColorMode) {
-        preferences.edit().putString(zoneColorKey(fieldId), mode.name).apply()
+        preferences.edit { putString(zoneColorKey(fieldId), mode.name) }
     }
 
     private fun read(fieldId: String) = fieldSettingsFrom(

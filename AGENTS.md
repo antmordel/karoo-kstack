@@ -46,6 +46,13 @@ division, no state, and it gets a max row that Karoo does not publish natively.
 - **`assembleRelease` is unsigned by default.** Release signing reads a base64 keystore from the
   environment; see the release workflow.
 - Karoo 2 is the `minSdk` floor. Do not raise it without checking Karoo 2.
+- **AGP 9 builds Kotlin itself.** The `org.jetbrains.kotlin.android` plugin must not be applied, and
+  `kotlinOptions` is gone — the JVM target lives in a top-level `kotlin { compilerOptions { } }`
+  block. Java 11 is the floor.
+- **The SDK 37 platform package is `platforms;android-37.0`, not `android-37`.** Installing the name
+  that looks right leaves the build without a platform. Build tools are `build-tools;37.0.0`, and
+  `release.yml` names both once in job `env` because the signature check reaches into build-tools by
+  path — when that drifted, the failure only showed up after a tag had been pushed.
 
 ## Conventions
 
