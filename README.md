@@ -7,8 +7,8 @@
 Garmin-style stacked data fields for [Hammerhead Karoo](https://www.hammerhead.io/), built on the
 official [karoo-ext](https://github.com/hammerheadnav/karoo-ext) SDK.
 
-A stock Karoo field shows one value. KStack shows a metric's current value large, with its ride
-aggregates small underneath — three numbers in the space of one.
+KStack draws a metric's current value large with its ride aggregates small underneath, so one field
+carries three numbers where a stock field carries one.
 
 Compatible with Karoo 2 and Karoo 3.
 
@@ -29,40 +29,44 @@ All six are graphical fields and scale their text to whatever grid size you plac
 
 The aggregates are Karoo's own `AVERAGE_*` and `MAX_*` data types, so they match the stock fields
 exactly and follow the same pause and reset behaviour. HR% divides those same heart rate values by
-the max HR in your Karoo user profile; if you have not set one, those rows stay empty.
+the max HR in your Karoo user profile; if you have set no max HR, those rows stay empty.
 
-Speed is shown in km/h or mph according to the unit preference in your Karoo profile. Rows resolve
-independently: a sensor that is not connected shows `--` on its own row while the others keep
-updating.
+Speed follows the unit preference in your Karoo profile, in km/h or mph. Rows resolve
+independently, so a disconnected sensor shows `--` on its own row while the others keep updating.
 
 ## Zone colouring and settings
 
 Open KStack from the main menu to reach its settings. Each field has its own:
 
-- **Zone colour** — off, the metric icon in the colour of your current zone, or the whole field
-  background in it with the text following. Heart rate and power have zones; speed, cadence and
-  time do not, so those fields offer no colour choice.
-- **Secondary values** — side by side, or stacked one per row.
+- **Zone colour**: off, the metric icon in the colour of your current zone, or the whole field
+  background in it with the text following. Heart rate and power have zones. Speed, cadence and
+  time have none, so those fields offer no colour choice.
+- **Secondary values**: side by side, or stacked one per row.
 
-Changes apply to fields already on a data page, without re-adding them.
+Changes apply to fields already on a data page, with no need to re-add them.
 
 ## Installation
 
 Download `app-release.apk` from the [latest release](https://github.com/antmordel/karoo-kstack/releases/latest).
 
-**Karoo 3** — use [Hammerhead's companion app sideloading](https://support.hammerhead.io/hc/en-us/articles/31576497036827-Companion-App-Sideloading):
-open the release page in your phone's browser, long-press the `app-release.apk` link and share it
+**Karoo 3**: use [Hammerhead's companion app sideloading](https://support.hammerhead.io/hc/en-us/articles/31576497036827-Companion-App-Sideloading).
+Open the release page in your phone's browser, long-press the `app-release.apk` link and share it
 with the Hammerhead Companion app, then press Install on the Karoo.
 
-**Karoo 2** — enable sideloading ([DC Rainmaker's guide](https://www.dcrainmaker.com/2021/02/how-to-sideload-android-apps-on-your-hammerhead-karoo-1-karoo-2.html))
+**Karoo 2**: enable sideloading ([DC Rainmaker's guide](https://www.dcrainmaker.com/2021/02/how-to-sideload-android-apps-on-your-hammerhead-karoo-1-karoo-2.html))
 and run `adb install app-release.apk`.
 
-To update later, long-press the KStack icon in the main menu and select Update.
+Open KStack once from the main menu after installing. The six fields then appear in the data field
+picker when you edit a data page, listed under the names in the table above.
 
-## Usage
+## Updating
 
-Open KStack once from the main menu after installing. The four fields then appear in the data field
-picker when you edit a data page, listed under their names above.
+Long-press the KStack icon in the main menu and select Update. The Karoo checks this repository's
+latest release and installs it in place, keeping your settings and the fields already on your data
+pages.
+
+This works from v0.2.3 onward. A copy sideloaded from an earlier release has no update URL to
+follow, so it needs one manual reinstall to pick the mechanism up.
 
 ## Building from source
 

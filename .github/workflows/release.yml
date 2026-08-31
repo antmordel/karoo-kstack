@@ -85,6 +85,7 @@ jobs:
             app/build/outputs/apk/release/app-release.apk
             app/build/manifest.json
             app/kstack.png
+            fields.png
 
       - name: Remove the decoded keystore
         if: always()
