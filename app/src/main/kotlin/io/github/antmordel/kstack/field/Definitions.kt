@@ -28,7 +28,7 @@ object Definitions {
 
     val HeartRate = StackedFieldDefinition(
         fieldId = "hr-stack",
-        zone = ZoneSource(DataType.Type.HR_ZONE) { it.heartRateZones },
+        zone = ZoneSource(DataType.Type.HR_ZONE, ZonePalette.HEART_RATE) { it.heartRateZones },
         nameRes = R.string.field_hr_stack,
         primary = StackedValue(DataType.Type.HEART_RATE, previewValue = 142.0),
         secondaries = listOf(
@@ -40,7 +40,7 @@ object Definitions {
 
     val HeartRatePercent = StackedFieldDefinition(
         fieldId = "hr-percent-stack",
-        zone = ZoneSource(DataType.Type.HR_ZONE) { it.heartRateZones },
+        zone = ZoneSource(DataType.Type.HR_ZONE, ZonePalette.HEART_RATE) { it.heartRateZones },
         nameRes = R.string.field_hr_percent_stack,
         primary = StackedValue(
             DataType.Type.HEART_RATE,
@@ -79,7 +79,7 @@ object Definitions {
 
     val Power = StackedFieldDefinition(
         fieldId = "power-stack",
-        zone = ZoneSource(DataType.Type.POWER_ZONE) { it.powerZones },
+        zone = ZoneSource(DataType.Type.POWER_ZONE, ZonePalette.POWER) { it.powerZones },
         nameRes = R.string.field_power_stack,
         primary = StackedValue(DataType.Type.POWER, previewValue = 248.0),
         secondaries = listOf(

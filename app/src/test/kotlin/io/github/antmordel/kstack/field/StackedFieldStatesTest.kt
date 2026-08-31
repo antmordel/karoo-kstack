@@ -65,7 +65,7 @@ private val definition = StackedFieldDefinition(
 )
 
 private val zonedDefinition = definition.copy(
-    zone = ZoneSource(ZONE) { it.heartRateZones },
+    zone = ZoneSource(ZONE, ZonePalette.HEART_RATE) { it.heartRateZones },
 )
 
 class StackedFieldStatesTest {

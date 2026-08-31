@@ -115,8 +115,10 @@ data class StackedFieldDefinition(
             secondaries = secondaries.map { SecondaryState(it.labelRes, it.previewValue) },
             // The zone climbs with the value, so a rider previewing a coloured field sees the
             // whole palette rather than one colour that could be the uncoloured default.
-            zone = zone?.let { (phase * PREVIEW_ZONE_COUNT).toInt().coerceAtMost(PREVIEW_ZONE_COUNT - 1) },
-            zoneCount = zone?.let { PREVIEW_ZONE_COUNT } ?: 0,
+            zone = zone?.let {
+                (phase * it.palette.zoneCount).toInt().coerceAtMost(it.palette.zoneCount - 1)
+            },
+            zoneCount = zone?.palette?.zoneCount ?: 0,
         )
     }
 
@@ -131,8 +133,6 @@ data class StackedFieldDefinition(
 
         /** Steps in one sweep. At the editor's one-second tick, a sweep takes twenty seconds. */
         const val PREVIEW_STEPS = 20
-
-        const val PREVIEW_ZONE_COUNT = 5
     }
 }
 
@@ -145,5 +145,6 @@ data class StackedFieldDefinition(
  */
 data class ZoneSource(
     val dataTypeId: String,
+    val palette: ZonePalette,
     val zonesOf: (UserProfile) -> List<UserProfile.Zone>,
 )

@@ -137,7 +137,9 @@ fun StackedFieldView(
     val horizontalAlignment = config.alignment.toGlanceAlignment()
     // Null whenever there is no zone to colour by, which is also what a field with colouring off
     // and a field on a metric without zones both look like.
-    val zoneColor = state.zone?.let { zoneColor(it, state.zoneCount) }
+    val zoneColor = definition.zone?.palette?.let { palette ->
+        state.zone?.let { zoneColor(palette, it) }
+    }
     val background = zoneColor.takeIf { settings.zoneColorMode == ZoneColorMode.FIELD }
     val contentColor = background?.let { ColorProvider(contentColorOn(it)) } ?: contentColor()
     val iconColor = when (settings.zoneColorMode) {
