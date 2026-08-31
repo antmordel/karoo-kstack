@@ -102,10 +102,12 @@ definition names its zone stream and the profile list to size it against; a defi
 none renders exactly as it does with colouring off, which is what Speed Stack does.
 
 - **karoo-ext publishes no palette.** `UserProfile.Zone` is `(min, max)` and nothing else. The
-  colours live in `render/ZoneColors.kt`, matched by eye against the stock heart rate field, and a
-  Karoo OS change can drift from them.
-- **Colours are spread across the palette by position, not by index**, so a rider with seven power
-  zones and one with five heart rate zones both see the top zone in the top colour.
+  colours in `render/ZoneColors.kt` are Karoo's own, as its Heart Rate Zones and Power Zones
+  settings screens draw them, so a Karoo OS change can drift from them.
+- **There are two scales, not one stretched to fit.** Heart rate has five zones and power seven;
+  they share their first four colours and diverge above threshold. A definition names its
+  `ZonePalette`, and `ZonePalette.zoneCount` is also what a coloured field previews across. A rider
+  with more zones than Karoo defines saturates at the top colour rather than losing it.
 - **On a zone-coloured field the text colour comes from the background, not the device.** Amber
   needs black text in night mode too. The choice uses the WCAG contrast ratio rather than a
   brightness threshold, which picks wrongly for the saturated mid stops, and `ContrastTest` holds

@@ -1,6 +1,18 @@
 package io.github.antmordel.kstack.field
 
 /**
+ * Which of Karoo's two zone scales a metric is on.
+ *
+ * They are different lengths and different colours above the fourth zone, so a definition has to
+ * say which one it means. [zoneCount] is how many zones Karoo defines for the metric, used to
+ * preview a coloured field across its whole scale.
+ */
+enum class ZonePalette(val zoneCount: Int) {
+    HEART_RATE(5),
+    POWER(7),
+}
+
+/**
  * Turns the zone number Karoo reports into a 0-based index into the rider's zones.
  *
  * Karoo reports zones the way its own screens label them, so Z1 arrives as 1. A number outside the

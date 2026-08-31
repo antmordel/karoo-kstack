@@ -1,6 +1,7 @@
 package io.github.antmordel.kstack.render
 
 import androidx.compose.ui.graphics.Color
+import io.github.antmordel.kstack.field.ZonePalette
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -21,25 +22,25 @@ class ContrastTest {
     }
 
     @Test
-    fun `every zone colour gets readable text on it`() {
-        // The saturated mid-tones are the ones a brightness threshold picks wrongly, so the whole
-        // palette is checked rather than the extremes.
-        (0 until 5).forEach { zone ->
-            val background = zoneColor(zone, zoneCount = 5)
-            val ratio = contrastRatio(contentColorOn(background), background)
+    fun `every zone colour on every scale gets readable text on it`() {
+        // The saturated mid-tones are the ones a brightness threshold picks wrongly, so every stop
+        // is checked rather than the extremes. A colour that cannot be read on cannot be added.
+        ZonePalette.entries.forEach { palette ->
+            (0 until palette.zoneCount).forEach { zone ->
+                val background = zoneColor(palette, zone)
+                val ratio = contrastRatio(contentColorOn(background), background)
 
-            assertTrue("zone $zone contrast $ratio", ratio >= LARGE_TEXT_CONTRAST)
+                assertTrue("$palette zone $zone contrast $ratio", ratio >= LARGE_TEXT_CONTRAST)
+            }
         }
     }
 
     @Test
-    fun `every zone colour of a seven zone rider gets readable text on it`() {
-        (0 until 7).forEach { zone ->
-            val background = zoneColor(zone, zoneCount = 7)
-            val ratio = contrastRatio(contentColorOn(background), background)
-
-            assertTrue("zone $zone contrast $ratio", ratio >= LARGE_TEXT_CONTRAST)
-        }
+    fun `the top of each scale is dark enough to need white text`() {
+        // Karoo's own hardest zones are deep red and magenta. Black on them is the pick a
+        // brightness threshold makes, and it is unreadable.
+        assertEquals(Color.White, contentColorOn(zoneColor(ZonePalette.HEART_RATE, 4)))
+        assertEquals(Color.White, contentColorOn(zoneColor(ZonePalette.POWER, 6)))
     }
 
     @Test
