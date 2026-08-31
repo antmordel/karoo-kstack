@@ -3,6 +3,10 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+// Every URL Karoo follows to find an update points at the latest release, so the numbers in a
+// manifest can never outlive the assets beside it.
+val baseUrl = "https://github.com/antmordel/karoo-kstack/releases/latest/download"
+
 android {
     namespace = "io.github.antmordel.kstack"
     compileSdk = 37
@@ -14,6 +18,11 @@ android {
         targetSdk = 37
         versionCode = System.getenv("RELEASE_VERSION_CODE")?.toInt() ?: 1
         versionName = System.getenv("RELEASE_VERSION") ?: "0.1.0"
+
+        // Karoo reads this to find manifest.json, which is what makes the Update entry in the
+        // long-press menu work. Without it an installed extension has no way to learn a newer
+        // version exists, however faithfully the manifest is published.
+        manifestPlaceholders["karooManifestUrl"] = "$baseUrl/manifest.json"
     }
 
     // The release workflow decodes the keystore secret to a file and points KEYSTORE_FILE at it.
@@ -72,7 +81,6 @@ tasks.register("generateManifest") {
     outputs.file(output)
 
     doLast {
-        val baseUrl = "https://github.com/antmordel/karoo-kstack/releases/latest/download"
         val manifest = mapOf(
             "label" to "KStack",
             "packageName" to "io.github.antmordel.kstack",
@@ -84,12 +92,20 @@ tasks.register("generateManifest") {
             "description" to "Stacked data fields: a large current value with smaller labelled " +
                 "values beneath it, for heart rate, heart rate percent, speed, power, cadence " +
                 "and lap time, with optional zone colouring.",
+            "screenshotUrls" to listOf("$baseUrl/fields.png"),
             "tags" to listOf("data-fields"),
         )
         output.get().asFile.writeText(groovy.json.JsonBuilder(manifest).toPrettyString())
     }
 }
 
+
+// DefinitionsTest and ExtensionManifestTest read these by path. Gradle cannot see that, so without
+// declaring them a change to either file leaves the test task UP-TO-DATE and the drift unproven.
+tasks.withType<Test>().configureEach {
+    inputs.file("src/main/AndroidManifest.xml")
+    inputs.file("src/main/res/xml/extension_info.xml")
+}
 
 kotlin {
     compilerOptions {
