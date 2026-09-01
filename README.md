@@ -4,6 +4,8 @@
 [![Downloads](https://img.shields.io/github/downloads/antmordel/karoo-kstack/app-release.apk)](https://github.com/antmordel/karoo-kstack/releases)
 [![License](https://img.shields.io/github/license/antmordel/karoo-kstack)](LICENSE)
 
+**English** · [Español](README.es.md)
+
 Garmin-style stacked data fields for [Hammerhead Karoo](https://www.hammerhead.io/), built on the
 official [karoo-ext](https://github.com/hammerheadnav/karoo-ext) SDK.
 

@@ -105,6 +105,8 @@ tasks.register("generateManifest") {
 tasks.withType<Test>().configureEach {
     inputs.file("src/main/AndroidManifest.xml")
     inputs.file("src/main/res/xml/extension_info.xml")
+    inputs.file("src/main/res/values/strings.xml")
+    inputs.files("../README.md", "../README.es.md")
 }
 
 kotlin {
