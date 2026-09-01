@@ -14,6 +14,10 @@ Compatible with Karoo 2 and Karoo 3.
 
 ![Six KStack fields on a Karoo data page](fields.png)
 
+[Fields](#fields) · [Zone colouring and settings](#zone-colouring-and-settings) ·
+[Installation](#installation) · [Updating](#updating) ·
+[Building from source](#building-from-source)
+
 ## Fields
 
 | Field | Large | Underneath |
@@ -47,14 +51,23 @@ Changes apply to fields already on a data page, with no need to re-add them.
 
 ## Installation
 
-Download `app-release.apk` from the [latest release](https://github.com/antmordel/karoo-kstack/releases/latest).
+### [⬇ Download app-release.apk](https://github.com/antmordel/karoo-kstack/releases/latest/download/app-release.apk)
 
-**Karoo 3**: use [Hammerhead's companion app sideloading](https://support.hammerhead.io/hc/en-us/articles/31576497036827-Companion-App-Sideloading).
-Open the release page in your phone's browser, long-press the `app-release.apk` link and share it
-with the Hammerhead Companion app, then press Install on the Karoo.
+That link always points at the newest release, so it is the one to share or bookmark. The
+[release page](https://github.com/antmordel/karoo-kstack/releases/latest) has the notes and
+the older versions.
+
+**Karoo 3**: open this page in your phone's browser, long-press the download link above and share
+it with the Hammerhead Companion app, then press Install on the Karoo. Hammerhead documents the
+flow in [Companion App Sideloading](https://support.hammerhead.io/hc/en-us/articles/31576497036827-Companion-App-Sideloading).
 
 **Karoo 2**: enable sideloading ([DC Rainmaker's guide](https://www.dcrainmaker.com/2021/02/how-to-sideload-android-apps-on-your-hammerhead-karoo-1-karoo-2.html))
-and run `adb install app-release.apk`.
+and run:
+
+```bash
+curl -LO https://github.com/antmordel/karoo-kstack/releases/latest/download/app-release.apk
+adb install app-release.apk
+```
 
 Open KStack once from the main menu after installing. The six fields then appear in the data field
 picker when you edit a data page, listed under the names in the table above.
