@@ -39,5 +39,13 @@
                 android:name="io.hammerhead.karooext.EXTENSION_INFO"
                 android:resource="@xml/extension_info" />
         </service>
+
+        <receiver
+            android:name=".field.PowerAveragingReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="io.github.antmordel.kstack.ACTION_CYCLE_POWER" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

@@ -11,7 +11,17 @@
     <string name="setting_zone_color">Zone colour</string>
     <string name="setting_zone_color_none">Off</string>
     <string name="setting_zone_color_icon">Icon</string>
-    <string name="setting_zone_color_field">Field</string>
+    <string name="setting_zone_color_field">Background</string>
+    <string name="setting_zone_palette">Colour palette</string>
+    <string name="setting_palette_karoo">Karoo</string>
+    <string name="setting_palette_garmin">Garmin</string>
+    <string name="setting_palette_zwift">Zwift</string>
+    <string name="setting_power_averaging">Power smoothing (double-tap in ride)</string>
+    <string name="power_averaging_instant">1s</string>
+    <string name="power_averaging_3s">3s</string>
+    <string name="power_averaging_5s">5s</string>
+    <string name="power_averaging_10s">10s</string>
+    <string name="power_averaging_30s">30s</string>
 
     <string name="field_hr_stack">HR Stack</string>
     <string name="field_hr_stack_description">Heart rate, with ride average and maximum beneath it.</string>

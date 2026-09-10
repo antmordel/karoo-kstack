@@ -122,6 +122,16 @@ data class StackedFieldDefinition(
         )
     }
 
+    /**
+     * Swaps the primary power stream when a smoothed window (e.g. 3s, 5s, 10s, 30s) is requested.
+     */
+    fun withPowerAveraging(averaging: io.github.antmordel.kstack.settings.PowerAveraging): StackedFieldDefinition =
+        if (fieldId == "power-stack") {
+            copy(primary = primary.copy(dataTypeId = averaging.dataTypeId))
+        } else {
+            this
+        }
+
     private companion object {
         /**
          * How far the primary climbs across a sweep, as a fraction of its own preview value.
