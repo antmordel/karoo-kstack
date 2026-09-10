@@ -42,7 +42,7 @@
 
         <receiver
             android:name=".field.PowerAveragingReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="io.github.antmordel.kstack.ACTION_CYCLE_POWER" />
             </intent-filter>
