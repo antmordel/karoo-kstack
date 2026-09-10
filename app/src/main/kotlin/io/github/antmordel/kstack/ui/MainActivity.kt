@@ -11,10 +11,12 @@ import android.widget.TextView
 import io.github.antmordel.kstack.R
 import io.github.antmordel.kstack.field.Definitions
 import io.github.antmordel.kstack.field.StackedFieldDefinition
+import io.github.antmordel.kstack.settings.PowerAveraging
 import io.github.antmordel.kstack.settings.SecondaryLayout
 import io.github.antmordel.kstack.settings.SettingsStore
-import io.github.antmordel.kstack.settings.ZoneColorMode
 import io.github.antmordel.kstack.settings.SharedPreferencesSettingsStore
+import io.github.antmordel.kstack.settings.ZoneColorMode
+import io.github.antmordel.kstack.settings.ZonePaletteScheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
@@ -66,6 +68,23 @@ class MainActivity : Activity() {
             zoneChoice.setOnCheckedChangeListener { _, checkedId ->
                 settings.setZoneColorMode(definition.fieldId, checkedId.toZoneColorMode())
             }
+
+            val paletteChoice = section.findViewById<RadioGroup>(R.id.zone_palette_choice)
+            paletteChoice.check(current.zonePaletteScheme.radioId())
+            paletteChoice.setOnCheckedChangeListener { _, checkedId ->
+                settings.setZonePaletteScheme(definition.fieldId, checkedId.toZonePaletteScheme())
+            }
+        }
+
+        val powerSection = section.findViewById<View>(R.id.power_averaging_section)
+        if (definition.fieldId != Definitions.Power.fieldId) {
+            powerSection.visibility = View.GONE
+        } else {
+            val powerChoice = section.findViewById<RadioGroup>(R.id.power_averaging_choice)
+            powerChoice.check(current.powerAveraging.radioId())
+            powerChoice.setOnCheckedChangeListener { _, checkedId ->
+                settings.setPowerAveraging(definition.fieldId, checkedId.toPowerAveraging())
+            }
         }
         return section
     }
@@ -90,5 +109,33 @@ class MainActivity : Activity() {
         R.id.zone_color_icon -> ZoneColorMode.ICON
         R.id.zone_color_field -> ZoneColorMode.FIELD
         else -> ZoneColorMode.NONE
+    }
+
+    private fun ZonePaletteScheme.radioId() = when (this) {
+        ZonePaletteScheme.KAROO -> R.id.palette_karoo
+        ZonePaletteScheme.GARMIN -> R.id.palette_garmin
+        ZonePaletteScheme.ZWIFT -> R.id.palette_zwift
+    }
+
+    private fun Int.toZonePaletteScheme() = when (this) {
+        R.id.palette_garmin -> ZonePaletteScheme.GARMIN
+        R.id.palette_zwift -> ZonePaletteScheme.ZWIFT
+        else -> ZonePaletteScheme.KAROO
+    }
+
+    private fun PowerAveraging.radioId() = when (this) {
+        PowerAveraging.INSTANT -> R.id.power_avg_instant
+        PowerAveraging.SMOOTHED_3S -> R.id.power_avg_3s
+        PowerAveraging.SMOOTHED_5S -> R.id.power_avg_5s
+        PowerAveraging.SMOOTHED_10S -> R.id.power_avg_10s
+        PowerAveraging.SMOOTHED_30S -> R.id.power_avg_30s
+    }
+
+    private fun Int.toPowerAveraging() = when (this) {
+        R.id.power_avg_3s -> PowerAveraging.SMOOTHED_3S
+        R.id.power_avg_5s -> PowerAveraging.SMOOTHED_5S
+        R.id.power_avg_10s -> PowerAveraging.SMOOTHED_10S
+        R.id.power_avg_30s -> PowerAveraging.SMOOTHED_30S
+        else -> PowerAveraging.INSTANT
     }
 }

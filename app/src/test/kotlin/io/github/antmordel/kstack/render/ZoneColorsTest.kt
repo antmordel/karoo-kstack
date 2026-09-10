@@ -58,4 +58,25 @@ class ZoneColorsTest {
     fun `a zone below the scale takes the easiest colour`() {
         assertEquals(zoneColor(ZonePalette.POWER, 0), zoneColor(ZonePalette.POWER, -3))
     }
+
+    @Test
+    fun `Garmin palette gives distinct colours across all zones`() {
+        ZonePalette.entries.forEach { palette ->
+            val colors = (0 until palette.zoneCount).map {
+                zoneColor(palette, it, io.github.antmordel.kstack.settings.ZonePaletteScheme.GARMIN)
+            }
+            assertEquals("Garmin ${palette.name}", palette.zoneCount, colors.toSet().size)
+        }
+    }
+
+    @Test
+    fun `Zwift palette gives distinct colours across all zones`() {
+        ZonePalette.entries.forEach { palette ->
+            val colors = (0 until palette.zoneCount).map {
+                zoneColor(palette, it, io.github.antmordel.kstack.settings.ZonePaletteScheme.ZWIFT)
+            }
+            assertEquals("Zwift ${palette.name}", palette.zoneCount, colors.toSet().size)
+        }
+    }
 }
+

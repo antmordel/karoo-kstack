@@ -22,6 +22,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
+
 /**
  * The one graphical data type. Every KStack field is an instance of this class holding a different
  * [definition] — there is no per-metric subclass, and adding a metric never reaches this file.
@@ -29,7 +32,7 @@ import kotlinx.coroutines.flow.onStart
  * Publishes no numeric stream of its own: a stacked field re-presents data types Karoo already
  * owns, so [DataTypeImpl.startStream] keeps its default.
  */
-@OptIn(ExperimentalGlanceRemoteViewsApi::class)
+@OptIn(ExperimentalGlanceRemoteViewsApi::class, ExperimentalCoroutinesApi::class)
 class StackedDataType(
     extension: String,
     private val definition: StackedFieldDefinition,
@@ -55,12 +58,15 @@ class StackedDataType(
         // definition's own numbers only for rows that have nothing yet. Those fall back to a value
         // that sweeps, so an unpaired sensor previews as a field that is working rather than one
         // that is stuck.
-        val states = if (config.preview) {
-            combine(streams.stackedFieldStates(definition), previewSweep()) { state, step ->
-                definition.withPreviewFallback(state, step)
+        val states = settings.flatMapLatest { fieldSettings ->
+            val effectiveDefinition = definition.withPowerAveraging(fieldSettings.powerAveraging)
+            if (config.preview) {
+                combine(streams.stackedFieldStates(effectiveDefinition), previewSweep()) { state, step ->
+                    effectiveDefinition.withPreviewFallback(state, step)
+                }
+            } else {
+                streams.stackedFieldStates(effectiveDefinition)
             }
-        } else {
-            streams.stackedFieldStates(definition)
         }
 
         val job = combine(
@@ -70,9 +76,10 @@ class StackedDataType(
         ) { state, profile, fieldSettings ->
             Triple(state, profile, fieldSettings)
         }.onEach { (state, profile, fieldSettings) ->
+            val effectiveDefinition = definition.withPowerAveraging(fieldSettings.powerAveraging)
             // GlanceRemoteViews.compose suspends, so composition lives on this collector.
             val result = glance.compose(context, DpSize.Unspecified) {
-                StackedFieldView(definition, state, profile, config, fieldSettings)
+                StackedFieldView(effectiveDefinition, state, profile, config, fieldSettings)
             }
             emitter.updateView(result.remoteViews)
         }.launchIn(CoroutineScope(Dispatchers.IO))

@@ -1,10 +1,13 @@
 package io.github.antmordel.kstack.render
 
+import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.ColorFilter
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.background
 import androidx.glance.Image
 import androidx.glance.ImageProvider
@@ -24,6 +27,7 @@ import android.content.res.Configuration
 import androidx.compose.ui.graphics.Color
 import androidx.glance.unit.ColorProvider
 import io.github.antmordel.kstack.R
+import io.github.antmordel.kstack.field.PowerAveragingReceiver
 import io.github.antmordel.kstack.field.StackedFieldDefinition
 import io.github.antmordel.kstack.field.StackedFieldState
 import io.github.antmordel.kstack.settings.FieldSettings
@@ -125,10 +129,12 @@ fun StackedFieldView(
         }
         .inSecondaryRows(settings.secondaryLayout)
     val primaryText = definition.formatter.formatOrDash(state.primary, profile)
+    val powerBadge = if (definition.fieldId == "power-stack") settings.powerAveraging.badge else ""
+    val powerBadgeWidth = if (powerBadge.isNotEmpty()) textWidthUnits(powerBadge) * 0.45f + 0.4f else 0f
     val sizes = stackedTextSizes(
         config = config,
         secondaryRowCount = secondaryRows.size,
-        primaryWidth = textWidthUnits(primaryText) + textWidthUnits(suffix) * SUFFIX_RATIO,
+        primaryWidth = textWidthUnits(primaryText) + textWidthUnits(suffix) * SUFFIX_RATIO + powerBadgeWidth,
         widestSecondaryRow = secondaryRows.maxOfOrNull { row ->
             row.map { it.widthUnits() }.sum()
         } ?: 0f,
@@ -138,13 +144,24 @@ fun StackedFieldView(
     // Null whenever there is no zone to colour by, which is also what a field with colouring off
     // and a field on a metric without zones both look like.
     val zoneColor = definition.zone?.palette?.let { palette ->
-        state.zone?.let { zoneColor(palette, it) }
+        state.zone?.let { zoneColor(palette, it, settings.zonePaletteScheme) }
     }
     val background = zoneColor.takeIf { settings.zoneColorMode == ZoneColorMode.FIELD }
     val contentColor = background?.let { ColorProvider(contentColorOn(it)) } ?: contentColor()
     val iconColor = when (settings.zoneColorMode) {
         ZoneColorMode.NONE, ZoneColorMode.FIELD -> contentColor
         ZoneColorMode.ICON -> zoneColor?.let { ColorProvider(it) } ?: contentColor
+    }
+    val context = LocalContext.current
+    val tapModifier = if (definition.fieldId == "power-stack") {
+        val intent = Intent(context, PowerAveragingReceiver::class.java).apply {
+            action = PowerAveragingReceiver.ACTION_CYCLE_POWER
+            putExtra(PowerAveragingReceiver.EXTRA_FIELD_ID, definition.fieldId)
+            `package` = context.packageName
+        }
+        GlanceModifier.clickable(actionSendBroadcast(intent))
+    } else {
+        GlanceModifier
     }
     // Verbose, and only reachable in debug builds where a Timber tree is planted. The layout
     // constants here were set against a real Karoo, and this is how they were read back.
@@ -167,6 +184,7 @@ fun StackedFieldView(
         modifier = GlanceModifier
             .fillMaxSize()
             .let { if (background != null) it.background(ColorProvider(background)) else it }
+            .then(tapModifier)
             // More room on the left than the right: the small labels start there, and hard against
             // the boundary they read as clipped.
             .padding(
@@ -195,6 +213,17 @@ fun StackedFieldView(
                 ),
             )
             Suffix(definition.suffixRes, sizes.primarySp, contentColor)
+            if (powerBadge.isNotEmpty()) {
+                Spacer(modifier = GlanceModifier.size(3.composeDp))
+                Text(
+                    text = powerBadge,
+                    style = TextStyle(
+                        fontSize = (sizes.primarySp * 0.45f).sp,
+                        fontWeight = FontWeight.Normal,
+                        color = contentColor,
+                    ),
+                )
+            }
         }
 
         secondaryRows.forEach { row ->
