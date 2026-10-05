@@ -1,8 +1,8 @@
 [versions]
-agp = "9.4.0"
-kotlin = "2.4.10"
+agp = "9.4.1"
+kotlin = "2.4.20"
 
-androidxCore = "1.19.0"
+androidxCore = "1.19.1"
 glance = "1.2.0"
 karooExt = "1.1.9"
 timber = "5.0.1"
